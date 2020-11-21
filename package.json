@@ -10,7 +10,7 @@
     "fix": "npm run lint -- --fix",
     "precommit": "lint-staged && npm run prepare",
     "start": "node -r sucrase/register src/indexApi.ts",
-    "demo": "parcel serve src/demo/index.html --open",
+    "client": "parcel serve src/client/index.html --open",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx ."
   },
   "husky": {
