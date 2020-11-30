@@ -7,6 +7,7 @@
   "license": "MIT",
   "author": "Airbitz, Inc.",
   "scripts": {
+    "build.lib": "sucrase -q -t typescript,imports,jsx -d ./lib ./src",
     "fix": "npm run lint -- --fix",
     "precommit": "lint-staged && npm run prepare",
     "start": "node -r sucrase/register src/indexApi.ts",
