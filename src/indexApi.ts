@@ -1,4 +1,11 @@
-import { asOptional, asString, asObject, asArray, asUnknown } from 'cleaners'
+import {
+  asOptional,
+  asString,
+  asObject,
+  asArray,
+  asUnknown,
+  asNumber
+} from 'cleaners'
 import cors from 'cors'
 import express from 'express'
 import nano from 'nano'
@@ -38,6 +45,61 @@ const asLog = asObject({
   ),
   data: asString
 })
+
+const asRetrievedLog = asObject({
+  _id: asString,
+  timestamp: asNumber,
+  isoDate: asOptional(asString),
+  uniqueId: asOptional(asString),
+  userMessage: asOptional(asString),
+  deviceInfo: asOptional(asString),
+  appVersion: asOptional(asString),
+  OS: asOptional(asString),
+  acctRepoId: asOptional(asString),
+  accounts: asOptional(
+    asArray(
+      asObject({
+        username: asString,
+        userId: asString
+      })
+    )
+  ),
+  loggedInUser: asOptional(
+    asObject({
+      userName: asString,
+      userId: asString,
+      wallets: asArray(
+        asObject({
+          currencyCode: asString,
+          repoId: asOptional(asString),
+          pluginDump: asOptional(asUnknown)
+        })
+      )
+    })
+  ),
+  data: asString
+})
+
+const asGetLog = asObject({
+  _id: asString
+})
+
+const asFindLogsReq = asObject({
+  start: asString,
+  end: asString,
+  deviceOs: asOptional(asString),
+  deviceInfo: asOptional(asString),
+  userMessage: asOptional(asString),
+  userName: asOptional(asString)
+})
+
+interface Selector {
+  timestamp: { $gte: number; $lt: number }
+  deviceOs?: { $eq: string }
+  deviceInfo?: { $regex: string }
+  userMessage?: { $regex: string }
+  userName?: { $eq: string }
+}
 
 const nanoDb = nano(config.couchDbFullpath)
 
@@ -83,6 +145,87 @@ function main(): void {
       return res.status(500).send(`Could not save log to database.`)
     }
     res.json(formattedLog)
+  })
+
+  app.get('/v1/getLog/', async function(req, res) {
+    let query
+    try {
+      query = asGetLog(req.query)._id
+    } catch (e) {
+      res.status(400).send(`Missing Request fields.`)
+      return
+    }
+
+    try {
+      const log = await logsRecords.get(query)
+      const cleanedLog = asRetrievedLog(log)
+      res.json(cleanedLog)
+    } catch (e) {
+      console.log(e)
+      if (e != null && e.error === 'not_found') {
+        res.status(404).send(`Could not find log with _id: ${query}.`)
+      } else {
+        res.status(500).send(`Internal Server Error.`)
+      }
+    }
+  })
+
+  app.get(`/v1/findLogs/`, async function(req, res) {
+    let logsQuery: ReturnType<typeof asFindLogsReq>
+    try {
+      logsQuery = asFindLogsReq(req.query)
+    } catch {
+      res.status(400).send(`Missing Request Fields`)
+      return
+    }
+
+    const {
+      start,
+      end,
+      deviceOs,
+      deviceInfo,
+      userMessage,
+      userName
+    } = logsQuery
+    const startTimestamp = parseFloat(start)
+    const endTimestamp = parseFloat(end)
+    if (
+      typeof startTimestamp !== 'number' ||
+      typeof endTimestamp !== 'number' ||
+      startTimestamp > endTimestamp
+    ) {
+      res.status(400).send(`Bad Timestamp Values.`)
+      return
+    }
+
+    const selector: Selector = {
+      timestamp: { $gte: startTimestamp, $lt: endTimestamp }
+    }
+    if (deviceOs !== undefined) {
+      selector.deviceOs = { $eq: deviceOs }
+    }
+    if (deviceInfo !== undefined) {
+      selector.deviceInfo = { $regex: deviceInfo }
+    }
+    if (userMessage !== undefined) {
+      selector.userMessage = { $regex: userMessage }
+    }
+    if (userName !== undefined) {
+      selector.userName = { $eq: userName }
+    }
+
+    const query = {
+      selector,
+      limit: 1000000
+    }
+
+    try {
+      const result = await logsRecords.find(query)
+      return res.json(result.docs)
+    } catch (e) {
+      console.log(e)
+      return res.status(500).send('Internal Server Error.')
+    }
   })
 
   app.listen(config.httpPort, function() {
