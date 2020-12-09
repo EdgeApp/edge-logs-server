@@ -112,7 +112,7 @@ function main(): void {
   app.use(cors())
   app.use('/', express.static('dist'))
 
-  app.put(`/api/v1/log/`, async function(req, res) {
+  app.put(`/v1/log/`, async function(req, res) {
     let log: ReturnType<typeof asLog>
     try {
       log = asLog(req.body)
