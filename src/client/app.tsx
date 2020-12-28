@@ -9,6 +9,15 @@ interface AppState {
   data: any[]
 }
 
+interface SearchParams {
+  start: number
+  end: number
+  deviceOs?: string
+  deviceInfo?: string
+  userMessage?: string
+  userName?: string
+}
+
 export const body = {
   margin: 0,
   padding: 0,
@@ -40,26 +49,10 @@ class App extends Component<{}, AppState> {
     Object.assign(document.body.style, body)
   }
 
-  getData = async (
-    start: number,
-    end: number,
-    deviceOs: string,
-    deviceInfo: string,
-    userMessage: string,
-    userName: string
-  ): Promise<void> => {
+  getData = async (params: SearchParams): Promise<void> => {
     console.time('getData')
-    console.log(start, end)
     this.setState({ loading: true })
-    const data = await searchLogs(
-      start / 1000,
-      end / 1000,
-      deviceOs,
-      deviceInfo,
-      userMessage,
-      userName
-    )
-    console.log(data)
+    const data = await searchLogs(params)
     this.setState({
       loading: false,
       data
