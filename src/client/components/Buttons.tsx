@@ -69,3 +69,52 @@ export class TimePeriodButton extends PureComponent<buttonProps, {}> {
     )
   }
 }
+
+interface SelectButtonProps {
+  label: string
+  options: { [option: string]: string }
+  onClick: Function
+}
+
+export const largeContainer = {
+  marginLeft: '26px',
+  marginTop: '24px',
+  display: 'flex',
+  flexDirection: 'column' as 'column'
+}
+
+export const inputLabel = {
+  fontSize: '16px',
+  color: 'white'
+}
+
+export const deviceTypeInput = {
+  fontSize: '16px',
+  backgroundColor: 'white',
+  border: 'none',
+  color: 'black',
+  marginTop: '3px',
+  width: '148px'
+}
+
+export class SelectButton extends PureComponent<SelectButtonProps, {}> {
+  render(): JSX.Element {
+    const { options, label, onClick } = this.props
+    const buttonOptions: JSX.Element[] = []
+    for (const option in options) {
+      buttonOptions.push(
+        <option key={option} value={option}>
+          {options[option]}
+        </option>
+      )
+    }
+    return (
+      <div style={largeContainer}>
+        <div style={inputLabel}>{label}</div>
+        <select style={deviceTypeInput} onChange={e => onClick(e)}>
+          {...buttonOptions}
+        </select>
+      </div>
+    )
+  }
+}

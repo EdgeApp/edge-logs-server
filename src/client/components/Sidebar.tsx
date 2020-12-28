@@ -2,7 +2,8 @@ import React, { PureComponent } from 'react'
 import Sidetab from './Sidetab'
 import TimePicker from './Timepicker'
 import Spinner from './Spinner'
-import { MainButton } from './Buttons'
+import { InputText } from './Inputs'
+import { MainButton, SelectButton } from './Buttons'
 
 interface SidebarProps {
   loading: boolean
@@ -17,67 +18,10 @@ interface SidebarState {
   userName: string
 }
 
-export const largeContainer = {
-  marginLeft: '26px',
-  marginTop: '24px',
-  display: 'flex',
-  flexDirection: 'column' as 'column'
-}
-
-export const smallContainer = {
-  marginLeft: '26px',
-  marginTop: '16px',
-  display: 'flex',
-  flexDirection: 'column' as 'column'
-}
-
 export const divider = {
   marginTop: '15px',
   width: '72%',
   borderTop: '.5px solid white'
-}
-
-export const inputLabel = {
-  fontSize: '16px',
-  color: 'white'
-}
-
-export const deviceTypeInput = {
-  fontSize: '16px',
-  backgroundColor: 'white',
-  border: 'none',
-  color: 'black',
-  marginTop: '3px',
-  width: '148px'
-}
-
-export const deviceInfoInput = {
-  fontSize: '16px',
-  backgroundColor: 'white',
-  border: 'none',
-  color: 'black',
-  marginTop: '3px',
-  minHeight: '50px',
-  width: '148px'
-}
-
-export const userMessageInput = {
-  fontSize: '16px',
-  backgroundColor: 'white',
-  border: 'none',
-  color: 'black',
-  marginTop: '3px',
-  minHeight: '90px',
-  width: '148px'
-}
-
-export const userNameInput = {
-  fontSize: '16px',
-  backgroundColor: 'white',
-  border: 'none',
-  color: 'black',
-  marginTop: '3px',
-  width: '148px'
 }
 
 class Sidebar extends PureComponent<SidebarProps, SidebarState> {
@@ -104,6 +48,7 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
   }
 
   handleDeviceTypeChange(e: any): void {
+    console.log(e.target.value)
     this.setState({ deviceType: e.target.value })
   }
 
@@ -119,73 +64,28 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
     this.setState({ userName: e.target.value })
   }
 
-  renderFields(): JSX.Element {
-    const deviceType = (
-      <div style={largeContainer}>
-        <div style={inputLabel}>Device Type</div>
-        <select
-          style={deviceTypeInput}
-          onChange={e => this.handleDeviceTypeChange(e)}
-        >
-          <option value="">--</option>
-          <option value="Android">Android</option>
-          <option value="IOS">IOS</option>
-        </select>
-      </div>
-    )
-
-    const deviceInfo = (
-      <div style={smallContainer}>
-        <div style={inputLabel}>Device Info</div>
-        <textarea
-          style={deviceInfoInput}
-          onChange={e => this.handleDeviceInfoChange(e)}
-        />
-      </div>
-    )
-    const userMessage = (
-      <div style={largeContainer}>
-        <div style={inputLabel}>User Message</div>
-        <textarea
-          style={userMessageInput}
-          onChange={e => this.handleUserMessageChange(e)}
-        />
-      </div>
-    )
-    const userName = (
-      <div style={smallContainer}>
-        <div style={inputLabel}>Username</div>
-        <input
-          style={userNameInput}
-          onChange={e => this.handleUserNameChange(e)}
-        />
-      </div>
-    )
-
-    return (
-      <>
-        {deviceType}
-        {deviceInfo}
-        {userMessage}
-        {userName}
-      </>
-    )
-  }
-
   renderSearchButton = (props: SidebarProps): JSX.Element => {
     if (props.loading === true) return <Spinner />
     return (
       <MainButton
         label="Search"
         onClick={async () => {
-          await this.props.getData(
-            this.state.start.getTime(),
-            this.state.end.getTime(),
-            this.state.deviceType,
-            this.state.deviceInfo,
-            this.state.userMessage,
-            this.state.userName
-          )
+          const {
+            start,
+            end,
+            deviceType,
+            deviceInfo,
+            userMessage,
+            userName
+          } = this.state
+          await this.props.getData({
+            start: start.getTime() / 1000,
+            end: end.getTime() / 1000,
+            deviceType,
+            deviceInfo,
+            userMessage,
+            userName
+          })
         }}
       />
     )
@@ -207,7 +107,29 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
           date={this.state.end}
           onChange={e => this.handleEndChange(e)}
         />
-        {this.renderFields()}
+        <SelectButton
+          label="Device Type"
+          options={{ '': '--', Android: 'Android', IOS: 'IOS' }}
+          onClick={e => this.handleDeviceTypeChange(e)}
+        />
+        <InputText
+          lines={3}
+          label="Device Info"
+          size="small"
+          onChange={e => this.handleDeviceInfoChange(e)}
+        />
+        <InputText
+          lines={5}
+          label="User Message"
+          size="large"
+          onChange={e => this.handleUserMessageChange(e)}
+        />
+        <InputText
+          lines={2}
+          label="User Name"
+          size="small"
+          onChange={e => this.handleUserNameChange(e)}
+        />
         <hr style={divider} />
         {this.renderSearchButton(this.props)}
       </Sidetab>
