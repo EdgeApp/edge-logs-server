@@ -73,7 +73,7 @@ export class TimePeriodButton extends PureComponent<buttonProps, {}> {
 interface SelectButtonProps {
   label: string
   options: { [option: string]: string }
-  onClick: Function
+  onChange: Function
 }
 
 export const largeContainer = {
@@ -99,20 +99,16 @@ export const deviceTypeInput = {
 
 export class SelectButton extends PureComponent<SelectButtonProps, {}> {
   render(): JSX.Element {
-    const { options, label, onClick } = this.props
-    const buttonOptions: JSX.Element[] = []
-    for (const option in options) {
-      buttonOptions.push(
-        <option key={option} value={option}>
-          {options[option]}
-        </option>
-      )
-    }
+    const { options, label, onChange } = this.props
     return (
       <div style={largeContainer}>
         <div style={inputLabel}>{label}</div>
-        <select style={deviceTypeInput} onChange={e => onClick(e)}>
-          {...buttonOptions}
+        <select style={deviceTypeInput} onChange={e => onChange(e)}>
+          {Object.keys(options).map(option => (
+            <option key={option} value={option}>
+              {options[option]}
+            </option>
+          ))}
         </select>
       </div>
     )

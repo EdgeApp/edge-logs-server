@@ -17,6 +17,7 @@ interface SidebarState {
   userMessage: string
   userName: string
 }
+type SidebarStateChange = Partial<SidebarState>
 
 export const divider = {
   marginTop: '15px',
@@ -37,31 +38,8 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
     }
   }
 
-  handleStartChange(start: Date): void {
-    console.log(start)
-    this.setState({ start })
-  }
-
-  handleEndChange(end: Date): void {
-    console.log(end)
-    this.setState({ end })
-  }
-
-  handleDeviceTypeChange(e: any): void {
-    console.log(e.target.value)
-    this.setState({ deviceType: e.target.value })
-  }
-
-  handleDeviceInfoChange(e: any): void {
-    this.setState({ deviceInfo: e.target.value })
-  }
-
-  handleUserMessageChange(e: any): void {
-    this.setState({ userMessage: e.target.value })
-  }
-
-  handleUserNameChange(e: any): void {
-    this.setState({ userName: e.target.value })
+  handleChange(state: SidebarStateChange): void {
+    this.setState({ ...this.state, ...state })
   }
 
   renderSearchButton = (props: SidebarProps): JSX.Element => {
@@ -70,21 +48,11 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
       <MainButton
         label="Search"
         onClick={async () => {
-          const {
-            start,
-            end,
-            deviceType,
-            deviceInfo,
-            userMessage,
-            userName
-          } = this.state
+          const { start, end } = this.state
           await this.props.getData({
+            ...this.state,
             start: start.getTime() / 1000,
-            end: end.getTime() / 1000,
-            deviceType,
-            deviceInfo,
-            userMessage,
-            userName
+            end: end.getTime() / 1000
           })
         }}
       />
@@ -99,36 +67,44 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
           label="Start"
           timePicker
           date={this.state.start}
-          onChange={e => this.handleStartChange(e)}
+          onChange={start => this.handleChange({ start })}
         />
         <TimePicker
           label="End"
           timePicker
           date={this.state.end}
-          onChange={e => this.handleEndChange(e)}
+          onChange={end => this.handleChange({ end })}
         />
         <SelectButton
           label="Device Type"
           options={{ '': '--', Android: 'Android', IOS: 'IOS' }}
-          onClick={e => this.handleDeviceTypeChange(e)}
+          onChange={({ target: { value: deviceType } }) =>
+            this.handleChange({ deviceType })
+          }
         />
         <InputText
           lines={3}
           label="Device Info"
           size="small"
-          onChange={e => this.handleDeviceInfoChange(e)}
+          onChange={({ target: { value: deviceInfo } }) =>
+            this.handleChange({ deviceInfo })
+          }
         />
         <InputText
           lines={5}
           label="User Message"
           size="large"
-          onChange={e => this.handleUserMessageChange(e)}
+          onChange={({ target: { value: userMessage } }) =>
+            this.handleChange({ userMessage })
+          }
         />
         <InputText
           lines={2}
           label="User Name"
           size="small"
-          onChange={e => this.handleUserNameChange(e)}
+          onChange={({ target: { value: userName } }) =>
+            this.handleChange({ userName })
+          }
         />
         <hr style={divider} />
         {this.renderSearchButton(this.props)}
