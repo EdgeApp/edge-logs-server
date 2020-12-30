@@ -13,7 +13,10 @@ const endpoint = `http://localhost:${config.httpPort}/v1/findLogs/?`
 
 export const searchLogs = async (params: SearchParams): Promise<any> => {
   const query = Object.keys(params)
-    .map(param => `${param}=${params[param]}`)
+    .map(param => {
+      if (params[param] !== '') return `${param}=${params[param]}`
+      return ''
+    })
     .join('&')
   const response = await fetch(endpoint + query)
   return response.json()
