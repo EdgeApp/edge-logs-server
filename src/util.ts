@@ -9,7 +9,7 @@ interface SearchParams {
   userName?: string
 }
 
-const endpoint = `http://localhost:${config.httpPort}/v1/findLogs/?`
+const endpoint = `https://${config.logsServerAddress}/v1/findLogs/?`
 
 export const searchLogs = async (params: SearchParams): Promise<any> => {
   const query = Object.keys(params)
