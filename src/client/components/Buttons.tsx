@@ -114,3 +114,28 @@ export class SelectButton extends PureComponent<SelectButtonProps, {}> {
     )
   }
 }
+
+export const uiButton = {
+  overflow: 'hidden' as 'hidden',
+  outline: 'none',
+  backgroundColor: 'transparent' as 'transparent',
+  fontSize: '16px',
+  cursor: 'pointer' as 'pointer',
+  color: 'black',
+  border: 'none'
+}
+
+interface UIButtonProps {
+  onClick: any
+  label: string
+}
+
+export class UIButton extends PureComponent<UIButtonProps, {}> {
+  render(): JSX.Element {
+    return (
+      <button style={uiButton} onClick={this.props.onClick}>
+        {this.props.label}
+      </button>
+    )
+  }
+}

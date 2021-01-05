@@ -3,6 +3,7 @@ import 'regenerator-runtime/runtime'
 import Sidebar from './components/Sidebar'
 import { searchLogs } from '../util'
 import './app.css'
+import List from './components/List'
 
 interface AppState {
   loading: boolean
@@ -61,14 +62,10 @@ class App extends Component<{}, AppState> {
   }
 
   render(): JSX.Element {
-    const data = this.state.data.map((object, index) => {
-      return <div key={index}>{JSON.stringify(object)}</div>
-    })
     return (
       <div style={row}>
         <Sidebar loading={this.state.loading} getData={this.getData} />
-        <p>hellooooo</p>
-        {data}
+        <List data={this.state.data} />
       </div>
     )
   }
