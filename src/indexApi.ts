@@ -9,6 +9,8 @@ import {
 import cors from 'cors'
 import express from 'express'
 import nano from 'nano'
+import { rebuildCouch } from './util/rebuildCouch'
+import { couchSchema } from './couchSchema'
 
 import config from '../config.json'
 
@@ -85,12 +87,19 @@ const asGetLog = asObject({
 })
 
 const asFindLogsReq = asObject({
+  loginUser: asString,
+  loginPassword: asString,
   start: asString,
   end: asString,
   deviceOs: asOptional(asString),
   deviceInfo: asOptional(asString),
   userMessage: asOptional(asString),
   userName: asOptional(asString)
+})
+
+const asLoginReq = asObject({
+  _id: asString,
+  authKey: asString
 })
 
 interface Selector {
@@ -107,10 +116,16 @@ function main(): void {
   // start express and couch db server
   const app = express()
   const logsRecords = nanoDb.use('logs_records')
+  const logsLogin = nanoDb.use('logs_login')
 
   app.use(express.json({ limit: '8mb' }))
   app.use(cors())
   app.use('/', express.static('dist'))
+
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*')
+    next()
+  })
 
   app.put(`/v1/log/`, async function(req, res) {
     let log: ReturnType<typeof asLog>
@@ -180,6 +195,8 @@ function main(): void {
     }
 
     const {
+      loginUser,
+      loginPassword,
       start,
       end,
       deviceOs,
@@ -187,6 +204,14 @@ function main(): void {
       userMessage,
       userName
     } = logsQuery
+    try {
+      const loginDoc = await logsLogin.get(loginUser)
+      const cleanLogin = asLoginReq(loginDoc)
+      if (cleanLogin.authKey !== loginPassword) throw new Error()
+    } catch {
+      res.status(400).send(`Bad Login Info.`)
+      return
+    }
     const startTimestamp = parseFloat(start)
     const endTimestamp = parseFloat(end)
     if (
@@ -220,6 +245,7 @@ function main(): void {
     }
 
     try {
+      // @ts-ignore
       const result = await logsRecords.find(query)
       return res.json(result.docs)
     } catch (e) {
@@ -232,4 +258,6 @@ function main(): void {
     console.log(`Server started on Port ${config.httpPort}`)
   })
 }
-main()
+rebuildCouch(config.couchDbFullpath, couchSchema)
+  .then(() => main())
+  .catch(e => console.log(e))
