@@ -6,11 +6,20 @@ const loader = {
   marginTop: '29px'
 }
 
-class Spinner extends PureComponent<{}, {}> {
+interface SpinnerProps {
+  color: string
+}
+
+class Spinner extends PureComponent<SpinnerProps, {}> {
   render(): JSX.Element {
     return (
       <div style={loader}>
-        <Loader type="Oval" color="white" height="30px" width="30px" />
+        <Loader
+          type="Oval"
+          color={this.props.color}
+          height="30px"
+          width="30px"
+        />
       </div>
     )
   }
