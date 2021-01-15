@@ -2,9 +2,7 @@ import React, { Component } from 'react'
 import 'regenerator-runtime/runtime'
 import Sidebar from './components/Sidebar'
 import { searchLogs } from '../util'
-import { instanceOf } from 'prop-types'
 import './app.css'
-import { Cookies, withCookies } from 'react-cookie'
 import List from './components/List'
 import LoginScreen from './components/LoginScreen'
 
@@ -20,7 +18,7 @@ type AppStateChange = Partial<AppState>
 
 interface SearchParams {
   loginUser: string
-  loginPassword: string
+  loginPassword?: string
   start: number
   end: number
   deviceOs?: string
@@ -47,21 +45,16 @@ export const column = {
   display: 'table-cell'
 }
 
-class App extends Component<{ cookies: any }, AppState> {
-  static propTypes = {
-    cookies: instanceOf(Cookies).isRequired
-  }
-
+class App extends Component<{}, AppState> {
   constructor(props) {
     super(props)
-    const { cookies } = props
     this.state = {
       loading: false,
       status: 0,
       data: [],
       loginMessage: 'Enter Username/Password',
-      loginUser: cookies.get('loginUser'),
-      loginPassword: cookies.get('loginPassword')
+      loginUser: '',
+      loginPassword: ''
     }
   }
 
@@ -102,37 +95,38 @@ class App extends Component<{ cookies: any }, AppState> {
         loading: false
       })
     }
-    if (response.status === 200) {
-      const { cookies } = this.props
-      const cookieTimePeriod = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-      cookies.set('loginUser', this.state.loginUser, {
-        path: '/',
-        expires: cookieTimePeriod
-      })
-      cookies.set('loginPassword', this.state.loginPassword, {
-        path: '/',
-        expires: cookieTimePeriod
-      })
-      this.setState({
-        status: 200
-      })
-    }
     console.timeEnd('getData')
     return response.status
   }
 
-  logout = (): void => {
-    const { cookies } = this.props
-    cookies.set('loginUser', '', { path: '/' })
-    cookies.set('loginPassword', '', { path: '/' })
+  login = async (params: SearchParams): Promise<void> => {
+    console.time('login')
+    const response = await this.getData(params)
+    if (response === 200) {
+      this.setState({
+        status: 200
+      })
+    }
+    console.timeEnd('login')
+  }
+
+  logout = async (): Promise<void> => {
+    console.log('start')
+    const response = await this.getData({
+      start: 0,
+      end: 0,
+      loginUser: 'logout'
+    })
+    console.log('here')
     this.setState({
       loading: false,
-      status: 0,
+      status: response,
       data: [],
       loginMessage: 'Enter Username/Password',
       loginUser: '',
       loginPassword: ''
     })
+    console.log('end')
   }
 
   renderMainView = (): JSX.Element => {
@@ -149,7 +143,7 @@ class App extends Component<{ cookies: any }, AppState> {
           }
           loginUser={this.state.loginUser}
           loginPassword={this.state.loginPassword}
-          getData={this.getData}
+          getData={this.login}
         />
       )
     }
@@ -172,4 +166,4 @@ class App extends Component<{ cookies: any }, AppState> {
     )
   }
 }
-export default withCookies(App)
+export default App

@@ -11,6 +11,7 @@ import express from 'express'
 import nano from 'nano'
 import { rebuildCouch } from './util/rebuildCouch'
 import { couchSchema } from './couchSchema'
+import cookieParser from 'cookie-parser'
 
 import config from '../config.json'
 
@@ -87,8 +88,6 @@ const asGetLog = asObject({
 })
 
 const asFindLogsReq = asObject({
-  loginUser: asString,
-  loginPassword: asString,
   start: asString,
   end: asString,
   deviceOs: asOptional(asString),
@@ -120,6 +119,7 @@ function main(): void {
 
   app.use(express.json({ limit: '8mb' }))
   app.use(cors())
+  app.use(cookieParser())
   app.use('/', express.static('dist'))
 
   app.use((req, res, next) => {
@@ -162,6 +162,32 @@ function main(): void {
     res.json(formattedLog)
   })
 
+  app.use(async function(req, res, next) {
+    const loginData = req.query ?? req.body ?? {}
+    if (loginData.loginUser === 'logout') {
+      res.cookie('loginUser', '')
+      res.cookie('loginPassword', '')
+      return res.status(401).send(`Logout`)
+    }
+    if (loginData.loginUser == null)
+      loginData.loginUser = req.cookies?.loginUser
+    if (loginData.loginPassword == null)
+      loginData.loginPassword = req.cookies?.loginPassword
+    const { loginUser, loginPassword } = loginData
+    try {
+      const loginDoc = await logsLogin.get(loginUser)
+      const cleanLogin = asLoginReq(loginDoc)
+      if (cleanLogin.authKey !== loginPassword) throw new Error()
+      res.cookie('loginUser', loginUser)
+      res.cookie('loginPassword', loginPassword)
+      next()
+    } catch {
+      res.cookie('loginUser', '')
+      res.cookie('loginPassword', '')
+      res.status(401).send(`Bad Login Info.`)
+    }
+  })
+
   app.get('/v1/getLog/', async function(req, res) {
     let query
     try {
@@ -195,8 +221,6 @@ function main(): void {
     }
 
     const {
-      loginUser,
-      loginPassword,
       start,
       end,
       deviceOs,
@@ -204,14 +228,6 @@ function main(): void {
       userMessage,
       userName
     } = logsQuery
-    try {
-      const loginDoc = await logsLogin.get(loginUser)
-      const cleanLogin = asLoginReq(loginDoc)
-      if (cleanLogin.authKey !== loginPassword) throw new Error()
-    } catch {
-      res.status(400).send(`Bad Login Info.`)
-      return
-    }
     const startTimestamp = parseFloat(start)
     const endTimestamp = parseFloat(end)
     if (
