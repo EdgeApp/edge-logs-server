@@ -49,7 +49,7 @@ const asLog = asObject({
   data: asString
 })
 
-const asRetrievedLog = asObject({
+const retrievedLogObj = {
   _id: asString,
   timestamp: asNumber,
   isoDate: asOptional(asString),
@@ -81,7 +81,9 @@ const asRetrievedLog = asObject({
     })
   ),
   data: asString
-})
+}
+
+const asRetrievedLog = asObject(retrievedLogObj)
 
 const asGetLog = asObject({
   _id: asString
@@ -257,7 +259,8 @@ function main(): void {
 
     const query = {
       selector,
-      limit: 1000000
+      limit: 1000000,
+      fields: Object.keys(retrievedLogObj).filter(field => field !== 'data')
     }
 
     try {
