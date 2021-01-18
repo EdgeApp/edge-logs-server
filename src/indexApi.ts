@@ -9,6 +9,9 @@ import {
 import cors from 'cors'
 import express from 'express'
 import nano from 'nano'
+import { rebuildCouch } from './util/rebuildCouch'
+import { couchSchema } from './couchSchema'
+import cookieParser from 'cookie-parser'
 
 import config from '../config.json'
 
@@ -93,6 +96,11 @@ const asFindLogsReq = asObject({
   userName: asOptional(asString)
 })
 
+const asLoginReq = asObject({
+  _id: asString,
+  authKey: asString
+})
+
 interface Selector {
   timestamp: { $gte: number; $lt: number }
   deviceOs?: { $eq: string }
@@ -107,10 +115,17 @@ function main(): void {
   // start express and couch db server
   const app = express()
   const logsRecords = nanoDb.use('logs_records')
+  const logsLogin = nanoDb.use('logs_login')
 
   app.use(express.json({ limit: '8mb' }))
   app.use(cors())
+  app.use(cookieParser())
   app.use('/', express.static('dist'))
+
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*')
+    next()
+  })
 
   app.put(`/v1/log/`, async function(req, res) {
     let log: ReturnType<typeof asLog>
@@ -145,6 +160,32 @@ function main(): void {
       return res.status(500).send(`Could not save log to database.`)
     }
     res.json(formattedLog)
+  })
+
+  app.use(async function(req, res, next) {
+    const loginData = req.query ?? req.body ?? {}
+    if (loginData.loginUser === 'logout') {
+      res.cookie('loginUser', '')
+      res.cookie('loginPassword', '')
+      return res.status(401).send(`Logout`)
+    }
+    if (loginData.loginUser == null)
+      loginData.loginUser = req.cookies?.loginUser
+    if (loginData.loginPassword == null)
+      loginData.loginPassword = req.cookies?.loginPassword
+    const { loginUser, loginPassword } = loginData
+    try {
+      const loginDoc = await logsLogin.get(loginUser)
+      const cleanLogin = asLoginReq(loginDoc)
+      if (cleanLogin.authKey !== loginPassword) throw new Error()
+      res.cookie('loginUser', loginUser)
+      res.cookie('loginPassword', loginPassword)
+      next()
+    } catch {
+      res.cookie('loginUser', '')
+      res.cookie('loginPassword', '')
+      res.status(401).send(`Bad Login Info.`)
+    }
   })
 
   app.get('/v1/getLog/', async function(req, res) {
@@ -220,6 +261,7 @@ function main(): void {
     }
 
     try {
+      // @ts-ignore
       const result = await logsRecords.find(query)
       return res.json(result.docs)
     } catch (e) {
@@ -232,4 +274,6 @@ function main(): void {
     console.log(`Server started on Port ${config.httpPort}`)
   })
 }
-main()
+rebuildCouch(config.couchDbFullpath, couchSchema)
+  .then(() => main())
+  .catch(e => console.log(e))

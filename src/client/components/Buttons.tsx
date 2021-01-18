@@ -139,3 +139,23 @@ export class UIButton extends PureComponent<UIButtonProps, {}> {
     )
   }
 }
+
+const loginButton = {
+  overflow: 'hidden' as 'hidden',
+  outline: 'none',
+  backgroundColor: 'transparent' as 'transparent',
+  fontSize: '16px',
+  cursor: 'pointer' as 'pointer',
+  color: 'black',
+  border: '1px solid black'
+}
+
+export class LoginButton extends PureComponent<buttonProps, {}> {
+  render(): JSX.Element {
+    return (
+      <button style={loginButton} onClick={() => this.props.onClick()}>
+        {this.props.label}
+      </button>
+    )
+  }
+}

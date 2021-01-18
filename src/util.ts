@@ -1,6 +1,8 @@
 import config from '../config.json'
 
 interface SearchParams {
+  loginUser: string
+  loginPassword?: string
   start: number
   end: number
   deviceOs?: string
@@ -19,5 +21,7 @@ export const searchLogs = async (params: SearchParams): Promise<any> => {
     })
     .join('&')
   const response = await fetch(endpoint + query)
-  return response.json()
+  if (!response.ok) return { data: [], status: response.status }
+  const data = await response.json()
+  return { data, status: response.status }
 }
