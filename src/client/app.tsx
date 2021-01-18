@@ -1,18 +1,20 @@
 import React, { Component } from 'react'
 import 'regenerator-runtime/runtime'
 import Sidebar from './components/Sidebar'
-import { searchLogs } from '../util'
+import { searchLogs, fetchLog, SearchLogsParams, FetchLogParams } from '../util'
 import './app.css'
 import List from './components/List'
+import LogView from './components/LogView'
 import LoginScreen from './components/LoginScreen'
 
 interface AppState {
+  loading: boolean
+  status: number
+  data: any[]
+  log: any
   loginMessage: string
   loginUser: string
   loginPassword: string
-  status: number
-  loading: boolean
-  data: any[]
 }
 type AppStateChange = Partial<AppState>
 
@@ -52,6 +54,7 @@ class App extends Component<{}, AppState> {
       loading: false,
       status: 0,
       data: [],
+      log: {},
       loginMessage: 'Enter Username/Password',
       loginUser: '',
       loginPassword: ''
@@ -80,7 +83,7 @@ class App extends Component<{}, AppState> {
     this.setState({ ...this.state, ...state })
   }
 
-  getData = async (params: SearchParams): Promise<number> => {
+  getData = async (params: SearchLogsParams): Promise<number> => {
     console.time('getData')
     this.setState({ loading: true })
     let response
@@ -99,6 +102,19 @@ class App extends Component<{}, AppState> {
     return response.status
   }
 
+  getLog = async (params: FetchLogParams): Promise<number> => {
+    console.time('getLog')
+    let response
+    try {
+      response = await fetchLog(params)
+      this.setState({
+        log: response.log
+      })
+    } catch {}
+    console.timeEnd('getLog')
+    return response.status
+  }
+
   login = async (params: SearchParams): Promise<void> => {
     console.time('login')
     const response = await this.getData(params)
@@ -111,13 +127,11 @@ class App extends Component<{}, AppState> {
   }
 
   logout = async (): Promise<void> => {
-    console.log('start')
     const response = await this.getData({
       start: 0,
       end: 0,
       loginUser: 'logout'
     })
-    console.log('here')
     this.setState({
       loading: false,
       status: response,
@@ -126,7 +140,6 @@ class App extends Component<{}, AppState> {
       loginUser: '',
       loginPassword: ''
     })
-    console.log('end')
   }
 
   renderMainView = (): JSX.Element => {
@@ -147,7 +160,22 @@ class App extends Component<{}, AppState> {
         />
       )
     }
-    return <List data={this.state.data} />
+    if (Object.keys(this.state.log).length === 0) {
+      return (
+        <List
+          data={this.state.data}
+          getLog={this.getLog}
+          loginUser={this.state.loginUser}
+          loginPassword={this.state.loginPassword}
+        />
+      )
+    }
+    return (
+      <LogView
+        log={this.state.log}
+        backFunction={() => this.handleChange({ log: {} })}
+      />
+    )
   }
 
   render(): JSX.Element {
