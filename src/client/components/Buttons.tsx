@@ -159,3 +159,26 @@ export class LoginButton extends PureComponent<buttonProps, {}> {
     )
   }
 }
+
+const backButton = {
+  overflow: 'hidden' as 'hidden',
+  outline: 'none',
+  backgroundColor: 'transparent' as 'transparent',
+  fontSize: '16px',
+  cursor: 'pointer' as 'pointer',
+  color: '#0077cc',
+  hoverColor: '0064bd',
+  border: 'none',
+  marginBottom: '10px',
+  paddingLeft: '0px'
+}
+
+export class BackButton extends PureComponent<buttonProps, {}> {
+  render(): JSX.Element {
+    return (
+      <button style={backButton} onClick={() => this.props.onClick()}>
+        {this.props.label}
+      </button>
+    )
+  }
+}
