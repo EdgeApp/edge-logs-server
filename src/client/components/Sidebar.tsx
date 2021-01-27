@@ -16,7 +16,7 @@ interface SidebarProps {
 interface SidebarState {
   start: Date
   end: Date
-  deviceType: string
+  deviceOS: string
   deviceInfo: string
   userMessage: string
   userName: string
@@ -35,7 +35,7 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
     this.state = {
       start: new Date(new Date().getTime() - 1000 * 60 * 60 * 24),
       end: new Date(),
-      deviceType: '',
+      deviceOS: '',
       deviceInfo: '',
       userMessage: '',
       userName: ''
@@ -84,10 +84,10 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
               onChange={end => this.handleChange({ end })}
             />
             <SelectButton
-              label="Device Type"
+              label="Device OS"
               options={{ '': '--', Android: 'Android', IOS: 'IOS' }}
-              onChange={({ target: { value: deviceType } }) =>
-                this.handleChange({ deviceType })
+              onChange={({ target: { value: deviceOS } }) =>
+                this.handleChange({ deviceOS })
               }
             />
             <InputText

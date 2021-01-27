@@ -40,13 +40,13 @@ class List extends Component<ListProps, {}> {
         cell: row => this.cellFunction(row, 'timestamp')
       },
       {
-        name: 'OS',
+        name: 'Device OS',
         selector: 'OS',
         sortable: true,
         cell: row => this.cellFunction(row, 'OS')
       },
       {
-        name: 'Device Type',
+        name: 'Device Info',
         selector: 'deviceInfo',
         sortable: true,
         cell: row => this.cellFunction(row, 'deviceInfo')

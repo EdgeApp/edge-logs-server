@@ -5,7 +5,7 @@ export interface SearchLogsParams {
   loginPassword?: string
   start: number
   end: number
-  deviceOs?: string
+  deviceOS?: string
   deviceInfo?: string
   userMessage?: string
   userName?: string
