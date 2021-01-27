@@ -64,6 +64,7 @@ class List extends Component<ListProps, {}> {
         <DataTable
           columns={columns}
           data={this.props.data}
+          defaultSortField="timestamp"
           noHeader
           pagination
           pointerOnHover
