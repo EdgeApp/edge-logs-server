@@ -92,7 +92,7 @@ const asGetLog = asObject({
 const asFindLogsReq = asObject({
   start: asString,
   end: asString,
-  deviceOs: asOptional(asString),
+  deviceOS: asOptional(asString),
   deviceInfo: asOptional(asString),
   userMessage: asOptional(asString),
   userName: asOptional(asString)
@@ -105,7 +105,7 @@ const asLoginReq = asObject({
 
 interface Selector {
   timestamp: { $gte: number; $lt: number }
-  deviceOs?: { $eq: string }
+  OS?: { $regex: string }
   deviceInfo?: { $regex: string }
   userMessage?: { $regex: string }
   userName?: { $eq: string }
@@ -225,7 +225,7 @@ function main(): void {
     const {
       start,
       end,
-      deviceOs,
+      deviceOS,
       deviceInfo,
       userMessage,
       userName
@@ -244,8 +244,8 @@ function main(): void {
     const selector: Selector = {
       timestamp: { $gte: startTimestamp, $lt: endTimestamp }
     }
-    if (deviceOs !== undefined) {
-      selector.deviceOs = { $eq: deviceOs }
+    if (deviceOS !== undefined) {
+      selector.OS = { $regex: `(?i)${deviceOS}` }
     }
     if (deviceInfo !== undefined) {
       selector.deviceInfo = { $regex: deviceInfo }
