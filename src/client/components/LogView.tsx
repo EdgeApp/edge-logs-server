@@ -1,10 +1,18 @@
 import React, { Component } from 'react'
 import ReactJson from 'react-json-view'
-import { BackButton } from './Buttons'
+import { fetchLog } from '../../util'
+import { Link, Redirect, withRouter } from 'react-router-dom'
 
 interface LogViewProps {
+  match: any
+  status: number
+  loginUser: string
+  loginPassword: string
+}
+
+interface LogViewState {
+  redirect: boolean
   log: any
-  backFunction: Function
 }
 
 const logViewStyle = {
@@ -12,13 +20,47 @@ const logViewStyle = {
   margin: 'auto'
 }
 
-class LogView extends Component<LogViewProps, {}> {
-  render(): JSX.Element {
+class LogView extends Component<LogViewProps, LogViewState> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      redirect: false,
+      log: {}
+    }
+  }
+
+  getLog = async (_id: string): Promise<any> => {
+    console.time('getLog')
+    const { loginUser, loginPassword } = this.props
+    let response
+    try {
+      response = await fetchLog({ loginUser, loginPassword, _id })
+    } catch {}
+    console.timeEnd('getLog')
+    return response
+  }
+
+  componentDidMount = async (): Promise<void> => {
+    const logID = this.props.match.params.logID
+    const log = await this.getLog(logID)
+    if (log.status === 401) {
+      this.setState({ redirect: true })
+      return
+    }
+    this.setState({
+      log: log.data
+    })
+  }
+
+  renderView = (): JSX.Element => {
+    if (this.state.redirect || this.props.status === 401) {
+      return <Redirect to={{ pathname: '/' }} />
+    }
     return (
       <div style={logViewStyle}>
-        <BackButton onClick={() => this.props.backFunction()} label="Back" />
+        <Link to="/">Back</Link>
         <ReactJson
-          src={this.props.log}
+          src={this.state.log}
           name="Log"
           theme="monokai"
           style={{
@@ -33,5 +75,9 @@ class LogView extends Component<LogViewProps, {}> {
       </div>
     )
   }
+
+  render(): JSX.Element {
+    return <>{this.renderView()}</>
+  }
 }
-export default LogView
+export default withRouter(LogView)
