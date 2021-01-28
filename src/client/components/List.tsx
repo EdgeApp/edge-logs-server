@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import DataTable from 'react-data-table-component'
-import { UIButton } from './Buttons'
+import { uiButton } from './Buttons'
+import { Link } from 'react-router-dom'
 
 interface ListProps {
   data: any[]
-  getLog: Function
   loginUser: string
   loginPassword: string
 }
@@ -12,16 +12,9 @@ interface ListProps {
 class List extends Component<ListProps, {}> {
   cellFunction = (row: any, field: string): JSX.Element => {
     return (
-      <UIButton
-        onClick={() =>
-          this.props.getLog({
-            _id: row._id,
-            loginUser: this.props.loginUser,
-            loginPassword: this.props.loginPassword
-          })
-        }
-        label={row[field]}
-      />
+      <Link style={uiButton} to={`/${row._id}`}>
+        {row[field]}
+      </Link>
     )
   }
 
