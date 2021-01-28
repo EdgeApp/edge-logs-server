@@ -1,17 +1,17 @@
 import React, { Component } from 'react'
 import 'regenerator-runtime/runtime'
 import Sidebar from './components/Sidebar'
-import { searchLogs, fetchLog, SearchLogsParams, FetchLogParams } from '../util'
+import { searchLogs, SearchLogsParams } from '../util'
 import './app.css'
 import List from './components/List'
 import LogView from './components/LogView'
 import LoginScreen from './components/LoginScreen'
+import { Route, Switch, HashRouter } from 'react-router-dom'
 
 interface AppState {
   loading: boolean
   status: number
   data: any[]
-  log: any
   loginMessage: string
   loginUser: string
   loginPassword: string
@@ -54,7 +54,6 @@ class App extends Component<{}, AppState> {
       loading: false,
       status: 0,
       data: [],
-      log: {},
       loginMessage: 'Enter Username/Password',
       loginUser: '',
       loginPassword: ''
@@ -71,6 +70,11 @@ class App extends Component<{}, AppState> {
       loginUser: this.state.loginUser,
       loginPassword: this.state.loginPassword
     })
+    if (status === 200) {
+      this.setState({
+        status: 200
+      })
+    }
     if (
       status !== 200 &&
       (this.state.loginUser !== '' || this.state.loginPassword !== '')
@@ -99,19 +103,6 @@ class App extends Component<{}, AppState> {
       })
     }
     console.timeEnd('getData')
-    return response.status
-  }
-
-  getLog = async (params: FetchLogParams): Promise<number> => {
-    console.time('getLog')
-    let response
-    try {
-      response = await fetchLog(params)
-      this.setState({
-        log: response.log
-      })
-    } catch {}
-    console.timeEnd('getLog')
     return response.status
   }
 
@@ -160,37 +151,42 @@ class App extends Component<{}, AppState> {
         />
       )
     }
-    if (Object.keys(this.state.log).length === 0) {
-      return (
-        <List
-          data={this.state.data}
-          getLog={this.getLog}
-          loginUser={this.state.loginUser}
-          loginPassword={this.state.loginPassword}
-        />
-      )
-    }
     return (
-      <LogView
-        log={this.state.log}
-        backFunction={() => this.handleChange({ log: {} })}
+      <List
+        data={this.state.data}
+        loginUser={this.state.loginUser}
+        loginPassword={this.state.loginPassword}
       />
     )
   }
 
   render(): JSX.Element {
     return (
-      <div style={row}>
-        <Sidebar
-          status={this.state.status}
-          loginUser={this.state.loginUser}
-          loginPassword={this.state.loginPassword}
-          loading={this.state.loading}
-          getData={this.getData}
-          logout={this.logout}
-        />
-        {this.renderMainView()}
-      </div>
+      <HashRouter>
+        <div style={row}>
+          <Sidebar
+            status={this.state.status}
+            loginUser={this.state.loginUser}
+            loginPassword={this.state.loginPassword}
+            loading={this.state.loading}
+            getData={this.getData}
+            logout={this.logout}
+          />
+          <Switch>
+            <Route
+              path="/:logID"
+              children={
+                <LogView
+                  status={this.state.status}
+                  loginUser={this.state.loginUser}
+                  loginPassword={this.state.loginPassword}
+                />
+              }
+            />
+            <Route path="/" children={this.renderMainView()} />
+          </Switch>
+        </div>
+      </HashRouter>
     )
   }
 }
