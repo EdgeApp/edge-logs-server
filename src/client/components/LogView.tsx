@@ -47,6 +47,12 @@ class LogView extends Component<LogViewProps, LogViewState> {
       this.setState({ redirect: true })
       return
     }
+    const dataArray: String[] = []
+    log.data.data = log.data.data.split('\n')
+    for (let i = 0; i < log.data.data.length; i += 100) {
+      dataArray.push(log.data.data.slice(i, i + 100).join('\n'))
+    }
+    log.data.data = dataArray
     this.setState({
       log: log.data
     })
@@ -63,6 +69,8 @@ class LogView extends Component<LogViewProps, LogViewState> {
           src={this.state.log}
           name="Log"
           theme="monokai"
+          displayDataTypes={false}
+          collapsed={2}
           style={{
             margin: '0 auto',
             width: '100%',
