@@ -33,11 +33,12 @@ const timePeriodButton = {
   border: 'none'
 }
 
-const uiButton = {
+export const uiButton = {
   ...button,
   overflow: 'hidden' as 'hidden',
   color: 'black',
-  border: 'none'
+  border: 'none',
+  textDecoration: 'none'
 }
 
 const loginButton = {
@@ -45,24 +46,9 @@ const loginButton = {
   border: '1px solid black'
 }
 
-const backButton = {
-  ...button,
-  overflow: 'hidden' as 'hidden',
-  color: '#0077cc',
-  hoverColor: '0064bd',
-  border: 'none',
-  marginBottom: '10px',
-  paddingLeft: '0px'
-}
-
 interface buttonProps {
   label: string
   onClick: () => void
-}
-
-interface UIButtonProps {
-  onClick: any
-  label: string
 }
 
 export class MainButton extends PureComponent<buttonProps, {}> {
@@ -95,30 +81,10 @@ export class TimePeriodButton extends PureComponent<buttonProps, {}> {
   }
 }
 
-export class UIButton extends PureComponent<UIButtonProps, {}> {
-  render(): JSX.Element {
-    return (
-      <button style={uiButton} onClick={this.props.onClick}>
-        {this.props.label}
-      </button>
-    )
-  }
-}
-
 export class LoginButton extends PureComponent<buttonProps, {}> {
   render(): JSX.Element {
     return (
       <button style={loginButton} onClick={() => this.props.onClick()}>
-        {this.props.label}
-      </button>
-    )
-  }
-}
-
-export class BackButton extends PureComponent<buttonProps, {}> {
-  render(): JSX.Element {
-    return (
-      <button style={backButton} onClick={() => this.props.onClick()}>
         {this.props.label}
       </button>
     )
