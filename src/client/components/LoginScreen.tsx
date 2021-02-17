@@ -46,6 +46,7 @@ const LoginScreen: any = (props: LoginScreenProps) => {
         <span>Password: </span>
         <input
           style={loginInput}
+          type="password"
           onChange={e => props.handlePasswordChange(e)}
         />
       </li>
