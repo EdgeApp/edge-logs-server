@@ -80,13 +80,14 @@ const retrievedLogObj = {
       )
     })
   ),
-  data: asString
+  data: asOptional(asString)
 }
 
 const asRetrievedLog = asObject(retrievedLogObj)
 
 const asGetLog = asObject({
-  _id: asString
+  _id: asString,
+  withData: asOptional(asString)
 })
 
 const asFindLogsReq = asObject({
@@ -191,22 +192,26 @@ function main(): void {
   })
 
   app.get('/v1/getLog/', async function(req, res) {
-    let query
+    let _id
+    let withData = false
     try {
-      query = asGetLog(req.query)._id
+      const query = asGetLog(req.query)
+      _id = query._id
+      if (query.withData === 'true') withData = true
     } catch (e) {
       res.status(400).send(`Missing Request fields.`)
       return
     }
 
     try {
-      const log = await logsRecords.get(query)
+      const log = await logsRecords.get(_id)
       const cleanedLog = asRetrievedLog(log)
+      if (withData === false) delete cleanedLog.data
       res.json(cleanedLog)
     } catch (e) {
       console.log(e)
       if (e != null && e.error === 'not_found') {
-        res.status(404).send(`Could not find log with _id: ${query}.`)
+        res.status(404).send(`Could not find log with _id: ${_id}.`)
       } else {
         res.status(500).send(`Internal Server Error.`)
       }

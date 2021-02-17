@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
-import ReactJson from 'react-json-view'
 import { fetchLog } from '../../util'
-import { Link, Redirect, withRouter } from 'react-router-dom'
+import { Redirect, withRouter } from 'react-router-dom'
 
 interface LogViewProps {
   match: any
@@ -16,19 +15,17 @@ interface LogViewState {
 }
 
 const logViewStyle = {
-  width: '96%',
-  margin: 'auto'
-}
-const linkStyle = {
-  marginRight: '10px'
+  width: '98%',
+  margin: 'auto',
+  whiteSpace: 'pre-line' as 'pre-line'
 }
 
-class LogView extends Component<LogViewProps, LogViewState> {
+class RawLogView extends Component<LogViewProps, LogViewState> {
   constructor(props) {
     super(props)
     this.state = {
       redirect: false,
-      log: {}
+      log: ''
     }
   }
 
@@ -40,7 +37,8 @@ class LogView extends Component<LogViewProps, LogViewState> {
       response = await fetchLog({
         loginUser,
         loginPassword,
-        _id
+        _id,
+        withData: true
       })
     } catch {}
     console.timeEnd('getLog')
@@ -55,7 +53,7 @@ class LogView extends Component<LogViewProps, LogViewState> {
       return
     }
     this.setState({
-      log: log.data
+      log: log.data.data
     })
   }
 
@@ -63,36 +61,11 @@ class LogView extends Component<LogViewProps, LogViewState> {
     if (this.state.redirect || this.props.status === 401) {
       return <Redirect to={{ pathname: '/' }} />
     }
-    const rawData = `/raw/${this.props.match.params.logID}`
-    return (
-      <div style={logViewStyle}>
-        <Link style={linkStyle} to="/">
-          Back
-        </Link>
-        <Link style={linkStyle} to={rawData}>
-          Raw Data
-        </Link>
-        <ReactJson
-          src={this.state.log}
-          name="Log"
-          theme="monokai"
-          displayDataTypes={false}
-          collapsed={2}
-          style={{
-            margin: '0 auto',
-            width: '100%',
-            minHeight: '30vh',
-            maxHeight: '90vh',
-            overflow: 'auto',
-            whiteSpace: 'pre-line'
-          }}
-        />
-      </div>
-    )
+    return <div style={logViewStyle}>{this.state.log}</div>
   }
 
   render(): JSX.Element {
     return <>{this.renderView()}</>
   }
 }
-export default withRouter(LogView)
+export default withRouter(RawLogView)

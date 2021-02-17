@@ -5,6 +5,7 @@ import { searchLogs, SearchLogsParams } from '../util'
 import './app.css'
 import List from './components/List'
 import LogView from './components/LogView'
+import RawLogView from './components/RawLogView'
 import LoginScreen from './components/LoginScreen'
 import { Route, Switch, HashRouter } from 'react-router-dom'
 
@@ -163,16 +164,26 @@ class App extends Component<{}, AppState> {
   render(): JSX.Element {
     return (
       <HashRouter>
-        <div style={row}>
-          <Sidebar
-            status={this.state.status}
-            loginUser={this.state.loginUser}
-            loginPassword={this.state.loginPassword}
-            loading={this.state.loading}
-            getData={this.getData}
-            logout={this.logout}
+        <Switch>
+          <Route
+            path="/raw/:logID"
+            children={
+              <RawLogView
+                status={this.state.status}
+                loginUser={this.state.loginUser}
+                loginPassword={this.state.loginPassword}
+              />
+            }
           />
-          <Switch>
+          <div style={row}>
+            <Sidebar
+              status={this.state.status}
+              loginUser={this.state.loginUser}
+              loginPassword={this.state.loginPassword}
+              loading={this.state.loading}
+              getData={this.getData}
+              logout={this.logout}
+            />
             <Route
               path="/:logID"
               children={
@@ -183,9 +194,9 @@ class App extends Component<{}, AppState> {
                 />
               }
             />
-            <Route path="/" children={this.renderMainView()} />
-          </Switch>
-        </div>
+            <Route exact path="/" children={this.renderMainView()} />
+          </div>
+        </Switch>
       </HashRouter>
     )
   }

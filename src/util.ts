@@ -15,6 +15,7 @@ export interface FetchLogParams {
   loginUser: string
   loginPassword?: string
   _id: string
+  withData?: boolean
 }
 
 const fetchApi = (endpoint: string) => async (params: any): Promise<any> => {
