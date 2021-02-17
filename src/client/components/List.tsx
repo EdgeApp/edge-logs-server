@@ -27,12 +27,6 @@ class List extends Component<ListProps, {}> {
         cell: row => this.cellFunction(row, '_id')
       },
       {
-        name: 'Timestamp',
-        selector: 'timestamp',
-        sortable: true,
-        cell: row => this.cellFunction(row, 'timestamp')
-      },
-      {
         name: 'Device OS',
         selector: 'OS',
         sortable: true,
@@ -57,7 +51,7 @@ class List extends Component<ListProps, {}> {
         <DataTable
           columns={columns}
           data={this.props.data}
-          defaultSortField="timestamp"
+          defaultSortField="_id"
           noHeader
           pagination
           pointerOnHover
