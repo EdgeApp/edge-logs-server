@@ -15,6 +15,9 @@ import cookieParser from 'cookie-parser'
 
 import config from '../config.json'
 
+import cluster from 'cluster'
+import { cpus } from 'os'
+
 const FIVE_MINUTES = 1000 * 60 * 5
 
 const asLog = asObject({
@@ -282,6 +285,34 @@ function main(): void {
     console.log(`Server started on Port ${config.httpPort}`)
   })
 }
-rebuildCouch(config.couchDbFullpath, couchSchema)
-  .then(() => main())
-  .catch(e => console.log(e))
+
+const numCPUs = cpus().length
+
+if (cluster.isMaster) {
+  rebuildCouch(config.couchDbFullpath, couchSchema)
+    .then(() => {
+      const instanceCount = config.instanceCount ?? numCPUs
+
+      // Fork workers.
+      for (let i = 0; i < instanceCount; i++) {
+        cluster.fork()
+      }
+
+      // Restart workers when they exit
+      cluster.on('exit', (worker, code, signal) => {
+        console.log(
+          `Worker ${worker.process.pid} died with code ${code} and signal ${signal}`
+        )
+        console.log(`Forking new worker process...`)
+        cluster.fork()
+      })
+    })
+    .catch(failStartup)
+} else {
+  main()
+}
+
+function failStartup(err: any): void {
+  console.error(err)
+  process.exit(1)
+}
