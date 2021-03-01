@@ -10,6 +10,7 @@ import cors from 'cors'
 import express from 'express'
 import nano from 'nano'
 import { rebuildCouch } from './util/rebuildCouch'
+import { autoReplication } from './util/autoReplication'
 import { couchSchema } from './couchSchema'
 import cookieParser from 'cookie-parser'
 
@@ -290,6 +291,13 @@ const numCPUs = cpus().length
 
 if (cluster.isMaster) {
   rebuildCouch(config.couchDbFullpath, couchSchema)
+    .then(async () =>
+      autoReplication(
+        config.infoServerAddress,
+        'logsServer',
+        config.infoServerApiKey
+      )
+    )
     .then(() => {
       const instanceCount = config.instanceCount ?? numCPUs
 
