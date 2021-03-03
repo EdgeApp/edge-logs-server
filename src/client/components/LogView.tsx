@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import ReactJson from 'react-json-view'
 import { fetchLog } from '../../util'
+import { CollapseButton } from './Buttons'
 import { Link, Redirect, withRouter } from 'react-router-dom'
 
 interface LogViewProps {
@@ -12,6 +13,7 @@ interface LogViewProps {
 
 interface LogViewState {
   redirect: boolean
+  collapsed: boolean
   log: any
 }
 
@@ -28,6 +30,7 @@ class LogView extends Component<LogViewProps, LogViewState> {
     super(props)
     this.state = {
       redirect: false,
+      collapsed: true,
       log: {}
     }
   }
@@ -72,12 +75,16 @@ class LogView extends Component<LogViewProps, LogViewState> {
         <Link style={linkStyle} to={rawData}>
           Raw Data
         </Link>
+        <CollapseButton
+          label={this.state.collapsed === true ? 'Expand' : 'Collapse'}
+          onClick={() => this.setState({ collapsed: !this.state.collapsed })}
+        />
         <ReactJson
           src={this.state.log}
           name="Log"
           theme="monokai"
           displayDataTypes={false}
-          collapsed={2}
+          collapsed={this.state.collapsed === true ? 2 : 5}
           style={{
             margin: '0 auto',
             width: '100%',
