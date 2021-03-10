@@ -46,6 +46,14 @@ const loginButton = {
   border: '1px solid black'
 }
 
+const collapseButton = {
+  ...uiButton,
+  border: 'none',
+  color: 'blue',
+  textDecoration: 'underline',
+  marginLeft: '-6px'
+}
+
 interface buttonProps {
   label: string
   onClick: () => void
@@ -85,6 +93,16 @@ export class LoginButton extends PureComponent<buttonProps, {}> {
   render(): JSX.Element {
     return (
       <button style={loginButton} onClick={() => this.props.onClick()}>
+        {this.props.label}
+      </button>
+    )
+  }
+}
+
+export class CollapseButton extends PureComponent<buttonProps, {}> {
+  render(): JSX.Element {
+    return (
+      <button style={collapseButton} onClick={() => this.props.onClick()}>
         {this.props.label}
       </button>
     )
