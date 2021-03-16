@@ -1655,7 +1655,7 @@ bn.js@^5.0.0, bn.js@^5.1.1:
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-5.1.3.tgz#beca005408f642ebebea80b042b4d18d2ac0ee6b"
   integrity sha512-GkTiFpjFtUzU9CbMeJ5iazkCzGL3jrhzerzZIuqLABjbwRaFt33I9tUdSNryIptM+RxDet6OKm2WnLXzW51KsQ==
 
-body-parser@1.19.0:
+body-parser@1.19.0, body-parser@^1.19.0:
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/body-parser/-/body-parser-1.19.0.tgz#96b2709e57c9c4e09a6fd66a8fd979844f69f08a"
   integrity sha512-dhEPs72UPbDnAQJ9ZKMNTP6ptJaionhP5cBb541nXPlW60Jepo9RV/a4fX4XWW9CuFNK22krhrj1+rgzifNCsw==
@@ -2037,6 +2037,11 @@ clean-stack@^2.0.0:
   resolved "https://registry.yarnpkg.com/clean-stack/-/clean-stack-2.2.0.tgz#ee8472dbb129e727b31e8a10a427dee9dfe4008b"
   integrity sha512-4diC9HaTE+KRAMWhDhrGOECgWZxoevMc5TlkObMqNSsVU62PYzXZ/SMTjzyGAFF1YusgxGcSWTEXBhp0CPwQ1A==
 
+cleaners@>=0.2.1:
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/cleaners/-/cleaners-0.3.7.tgz#b8fa056a430974d1125a1bb523ee128a6763fbfd"
+  integrity sha512-pRzWeIOXnbgJa211YAHjU1zW1kFMCdftJrB6DJC98nRAcd5XepWy0sAmvZ3kuh1g0y9gukRNSCli0+8aVNhwRg==
+
 cleaners@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/cleaners/-/cleaners-0.2.1.tgz#535849cfabc91e3ae1fc872b43d450446cd1a1a1"
@@ -2185,6 +2190,11 @@ commander@^5.0.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-5.1.0.tgz#46abbd1652f8e059bddaef99bbdcb2ad9cf179ae"
   integrity sha512-P0CysNDQ7rtVw4QIQtm+MRxV66vKFSvlsQvGYXZWR3qFU0jlMKHZZZgw8e+8DSah4UDKMqnknRDQz+xuQXQ/Zg==
+
+commander@^6.1.0:
+  version "6.2.1"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-6.2.1.tgz#0792eb682dfbc325999bb2b84fddddba110ac73c"
+  integrity sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==
 
 commander@^6.2.0:
   version "6.2.0"
@@ -2851,6 +2861,19 @@ ecc-jsbn@~0.1.1:
   dependencies:
     jsbn "~0.1.0"
     safer-buffer "^2.1.0"
+
+"edge-server-tools@https://github.com/EdgeApp/edge-server-tools.git#thomas/dbSetupFunctions":
+  version "0.1.0"
+  resolved "https://github.com/EdgeApp/edge-server-tools.git#7815161714d0c01236f30627e16e1cf6b74143eb"
+  dependencies:
+    "@types/node" "^14.0.22"
+    body-parser "^1.19.0"
+    cleaners ">=0.2.1"
+    commander "^6.1.0"
+    cors "^2.8.5"
+    nano "^8.2.2"
+    node-fetch "^2.6.1"
+    prop-types ">= 15.5.10 < 16.0.0"
 
 ee-first@1.1.1:
   version "1.1.1"

@@ -7,17 +7,22 @@ import {
   asNumber
 } from 'cleaners'
 import cors from 'cors'
+import {
+  autoReplication,
+  forkChildren,
+  makePeriodicTask,
+  rebuildCouch
+} from 'edge-server-tools'
 import express from 'express'
 import nano from 'nano'
-import { rebuildCouch } from './util/rebuildCouch'
 import { couchSchema } from './couchSchema'
 import cookieParser from 'cookie-parser'
 
 import config from '../config.json'
 
 import cluster from 'cluster'
-import { cpus } from 'os'
 
+const AUTOREPLICATION_DELAY = 1000 * 60 * 30 // 30 minutes
 const FIVE_MINUTES = 1000 * 60 * 5
 
 const asLog = asObject({
@@ -117,7 +122,7 @@ interface Selector {
 
 const nanoDb = nano(config.couchDbFullpath)
 
-function main(): void {
+function api(): void {
   // start express and couch db server
   const app = express()
   const logsRecords = nanoDb.use('logs_records')
@@ -286,33 +291,25 @@ function main(): void {
   })
 }
 
-const numCPUs = cpus().length
-
-if (cluster.isMaster) {
-  rebuildCouch(config.couchDbFullpath, couchSchema)
-    .then(() => {
-      const instanceCount = config.instanceCount ?? numCPUs
-
-      // Fork workers.
-      for (let i = 0; i < instanceCount; i++) {
-        cluster.fork()
-      }
-
-      // Restart workers when they exit
-      cluster.on('exit', (worker, code, signal) => {
-        console.log(
-          `Worker ${worker.process.pid} died with code ${code} and signal ${signal}`
-        )
-        console.log(`Forking new worker process...`)
-        cluster.fork()
-      })
-    })
-    .catch(failStartup)
-} else {
-  main()
+async function main(): Promise<void> {
+  const { couchDbFullpath, infoServerAddress, infoServerApiKey } = config
+  if (cluster.isMaster) {
+    await rebuildCouch(couchDbFullpath, couchSchema).catch(e => console.log(e))
+    const task = makePeriodicTask(
+      async () =>
+        autoReplication(
+          infoServerAddress,
+          'logsServer',
+          infoServerApiKey,
+          couchDbFullpath
+        ).catch(e => console.log(e)),
+      AUTOREPLICATION_DELAY
+    )
+    task.start()
+    forkChildren()
+  } else {
+    api()
+  }
 }
 
-function failStartup(err: any): void {
-  console.error(err)
-  process.exit(1)
-}
+main().catch(e => console.log(e))
