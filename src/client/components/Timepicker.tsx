@@ -1,6 +1,7 @@
+import 'react-datepicker/dist/react-datepicker.css'
+
 import React, { PureComponent } from 'react'
 import DatePicker from 'react-datepicker'
-import 'react-datepicker/dist/react-datepicker.css'
 
 const dateContainer = {
   marginLeft: '26px'

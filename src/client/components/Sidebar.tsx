@@ -1,9 +1,10 @@
 import React, { PureComponent } from 'react'
-import Sidetab from './Sidetab'
-import TimePicker from './Timepicker'
-import Spinner from './Spinner'
-import { InputText } from './Inputs'
+
 import { MainButton, SelectButton } from './Buttons'
+import { InputText } from './Inputs'
+import Sidetab from './Sidetab'
+import Spinner from './Spinner'
+import TimePicker from './Timepicker'
 
 interface SidebarProps {
   status: number
@@ -47,7 +48,7 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
   }
 
   renderSearchButton = (props: SidebarProps): JSX.Element => {
-    if (props.loading === true) return <Spinner color="white" />
+    if (props.loading) return <Spinner color="white" />
     return (
       <MainButton
         label="Search"

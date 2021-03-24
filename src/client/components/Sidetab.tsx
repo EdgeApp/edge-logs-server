@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 
-// @ts-ignore
+// @ts-expect-error
 import logo from '../images/logo.png'
 
 interface SidetabProps {

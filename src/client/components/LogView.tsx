@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import ReactJson from 'react-json-view'
+import { Link, Redirect, withRouter } from 'react-router-dom'
+
 import { fetchLog } from '../../util'
 import { CollapseButton } from './Buttons'
-import { Link, Redirect, withRouter } from 'react-router-dom'
 
 interface LogViewProps {
   match: any
@@ -66,6 +67,7 @@ class LogView extends Component<LogViewProps, LogViewState> {
     if (this.state.redirect || this.props.status === 401) {
       return <Redirect to={{ pathname: '/' }} />
     }
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const rawData = `/raw/${this.props.match.params.logID}`
     return (
       <div style={logViewStyle}>
@@ -76,7 +78,7 @@ class LogView extends Component<LogViewProps, LogViewState> {
           Raw Data
         </Link>
         <CollapseButton
-          label={this.state.collapsed === true ? 'Expand' : 'Collapse'}
+          label={this.state.collapsed ? 'Expand' : 'Collapse'}
           onClick={() => this.setState({ collapsed: !this.state.collapsed })}
         />
         <ReactJson
@@ -84,7 +86,7 @@ class LogView extends Component<LogViewProps, LogViewState> {
           name="Log"
           theme="monokai"
           displayDataTypes={false}
-          collapsed={this.state.collapsed === true ? 2 : 5}
+          collapsed={this.state.collapsed ? 2 : 5}
           style={{
             margin: '0 auto',
             width: '100%',

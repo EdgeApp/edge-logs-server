@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
-import { fetchLog } from '../../util'
 import { Redirect, withRouter } from 'react-router-dom'
+
+import { fetchLog } from '../../util'
 
 interface LogViewProps {
   match: any

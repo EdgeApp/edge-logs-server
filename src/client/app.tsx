@@ -1,13 +1,15 @@
-import React, { Component } from 'react'
 import 'regenerator-runtime/runtime'
-import Sidebar from './components/Sidebar'
-import { searchLogs, SearchLogsParams } from '../util'
 import './app.css'
+
+import React, { Component } from 'react'
+import { HashRouter, Route, Switch } from 'react-router-dom'
+
+import { searchLogs, SearchLogsParams } from '../util'
 import List from './components/List'
+import LoginScreen from './components/LoginScreen'
 import LogView from './components/LogView'
 import RawLogView from './components/RawLogView'
-import LoginScreen from './components/LoginScreen'
-import { Route, Switch, HashRouter } from 'react-router-dom'
+import Sidebar from './components/Sidebar'
 
 interface AppState {
   loading: boolean
@@ -167,6 +169,7 @@ class App extends Component<{}, AppState> {
         <Switch>
           <Route
             path="/raw/:logID"
+            // eslint-disable-next-line react/no-children-prop
             children={
               <RawLogView
                 status={this.state.status}
@@ -186,6 +189,7 @@ class App extends Component<{}, AppState> {
             />
             <Route
               path="/:logID"
+              // eslint-disable-next-line react/no-children-prop
               children={
                 <LogView
                   status={this.state.status}
@@ -194,7 +198,12 @@ class App extends Component<{}, AppState> {
                 />
               }
             />
-            <Route exact path="/" children={this.renderMainView()} />
+            <Route
+              exact
+              path="/"
+              // eslint-disable-next-line react/no-children-prop
+              children={this.renderMainView()}
+            />
           </div>
         </Switch>
       </HashRouter>

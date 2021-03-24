@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { LoginButton } from './Buttons'
 import Spinner from './Spinner'
 
@@ -34,7 +35,7 @@ const loginInput = {
 }
 
 const LoginScreen: any = (props: LoginScreenProps) => {
-  if (props.loading === true) return <Spinner color="blue" />
+  if (props.loading) return <Spinner color="blue" />
   return (
     <ul>
       <li style={loginMessage}>{props.loginMessage}</li>
