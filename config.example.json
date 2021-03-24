@@ -6,6 +6,5 @@
     "infoServerApiKey": "hex",
     "hostname": "",
     "httpPort": "",
-    "logsServerAddress": "",
-    "instanceCount": null
+    "logsServerAddress": ""
 }
