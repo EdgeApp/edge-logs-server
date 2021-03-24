@@ -1,22 +1,21 @@
 import {
+  asArray,
+  asNumber,
+  asObject,
   asOptional,
   asString,
-  asObject,
-  asArray,
-  asUnknown,
-  asNumber
+  asUnknown
 } from 'cleaners'
+import cluster from 'cluster'
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
 import nano from 'nano'
-import { rebuildCouch } from './util/rebuildCouch'
-import { couchSchema } from './couchSchema'
-import cookieParser from 'cookie-parser'
+import { cpus } from 'os'
 
 import config from '../config.json'
-
-import cluster from 'cluster'
-import { cpus } from 'os'
+import { couchSchema } from './couchSchema'
+import { rebuildCouch } from './util/rebuildCouch'
 
 const FIVE_MINUTES = 1000 * 60 * 5
 
@@ -133,7 +132,7 @@ function main(): void {
     next()
   })
 
-  app.put(`/v1/log/`, async function(req, res) {
+  app.put(`/v1/log/`, async function (req, res) {
     let log: ReturnType<typeof asLog>
     try {
       log = asLog(req.body)
@@ -168,7 +167,7 @@ function main(): void {
     res.json(formattedLog)
   })
 
-  app.use(async function(req, res, next) {
+  app.use(async function (req, res, next) {
     const loginData = req.query ?? req.body ?? {}
     if (loginData.loginUser === 'logout') {
       res.cookie('loginUser', '')
@@ -194,7 +193,7 @@ function main(): void {
     }
   })
 
-  app.get('/v1/getLog/', async function(req, res) {
+  app.get('/v1/getLog/', async function (req, res) {
     let _id
     let withData = false
     try {
@@ -209,11 +208,12 @@ function main(): void {
     try {
       const log = await logsRecords.get(_id)
       const cleanedLog = asRetrievedLog(log)
-      if (withData === false) delete cleanedLog.data
+      if (!withData) delete cleanedLog.data
       res.json(cleanedLog)
     } catch (e) {
       console.log(e)
       if (e != null && e.error === 'not_found') {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         res.status(404).send(`Could not find log with _id: ${_id}.`)
       } else {
         res.status(500).send(`Internal Server Error.`)
@@ -221,7 +221,7 @@ function main(): void {
     }
   })
 
-  app.get(`/v1/findLogs/`, async function(req, res) {
+  app.get(`/v1/findLogs/`, async function (req, res) {
     let logsQuery: ReturnType<typeof asFindLogsReq>
     try {
       logsQuery = asFindLogsReq(req.query)
@@ -272,7 +272,7 @@ function main(): void {
     }
 
     try {
-      // @ts-ignore
+      // @ts-expect-error
       const result = await logsRecords.find(query)
       return res.json(result.docs)
     } catch (e) {
@@ -281,7 +281,7 @@ function main(): void {
     }
   })
 
-  app.listen(config.httpPort, function() {
+  app.listen(config.httpPort, function () {
     console.log(`Server started on Port ${config.httpPort}`)
   })
 }
@@ -291,7 +291,8 @@ const numCPUs = cpus().length
 if (cluster.isMaster) {
   rebuildCouch(config.couchDbFullpath, couchSchema)
     .then(() => {
-      const instanceCount = config.instanceCount ?? numCPUs
+      const instanceCount =
+        config.instanceCount != null ? config.instanceCount ?? numCPUs : numCPUs
 
       // Fork workers.
       for (let i = 0; i < instanceCount; i++) {

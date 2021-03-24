@@ -1,5 +1,11 @@
 {
     "couchDbFullpath": "http://admin:admin@localhost:5984",
+    "dbUsername": "username",
+    "dbPassword": "password",
+    "infoServerAddress": "info1.edge.app",
+    "infoServerApiKey": "hex",
+    "hostname": "",
     "httpPort": "",
-    "logsServerAddress": ""
+    "logsServerAddress": "",
+    "instanceCount": null
 }

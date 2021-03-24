@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import DataTable from 'react-data-table-component'
-import { uiButton } from './Buttons'
 import { Link } from 'react-router-dom'
+
+import { uiButton } from './Buttons'
 
 interface ListProps {
   data: any[]
@@ -12,6 +13,7 @@ interface ListProps {
 class List extends Component<ListProps, {}> {
   cellFunction = (row: any, field: string): JSX.Element => {
     return (
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       <Link style={uiButton} to={`/${row._id}`}>
         {row[field]}
       </Link>
