@@ -18,7 +18,7 @@ import {
 import express from 'express'
 import nano from 'nano'
 
-import config from '../config.json'
+import { config } from './config'
 import { couchSchema } from './couchSchema'
 
 const AUTOREPLICATION_DELAY = 1000 * 60 * 30 // 30 minutes
