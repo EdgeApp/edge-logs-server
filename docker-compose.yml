@@ -1,0 +1,7 @@
+services:
+  infoserver:
+    image: logs_server:latest
+    network_mode: host
+    volumes:
+      - /Users/{$}/Developer/Edge/edge-logs-server/logs:/usr/server/logs # Use absolute field and linux
+    container_name: logs-server

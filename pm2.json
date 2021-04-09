@@ -1,0 +1,11 @@
+{
+	"apps": [
+		{
+			"name": "logs",
+			"script": "src/indexApi.ts",
+      "instances": "1",
+      "error_file": "logs/logsServer/error.log",
+      "out_file": "logs/logsServer/log.log"
+		}
+	]
+}
