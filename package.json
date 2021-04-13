@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@types/node": "^14.0.22",
-    "cleaner-config": "^0.1.1",
+    "cleaner-config": "^0.1.4",
     "cleaners": "^0.2.1",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
