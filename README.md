@@ -2,6 +2,13 @@
 
 ## Provides interface for searching user logs
 
+### Login page:
+![Log Info Example](./README/Images/login.png)
+### Overview of logs:
+![Log Info Example](./README/Images/overview.png)
+### Breakdown of log info:
+![Log Info Example](./README/Images/log_info.png)
+
 ### Installation
 
 Install Yarn
