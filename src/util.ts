@@ -1,4 +1,4 @@
-import { config } from './config'
+import config from '../config.json'
 
 export interface SearchLogsParams {
   loginUser: string
@@ -19,7 +19,14 @@ export interface FetchLogParams {
 }
 
 const fetchApi = (endpoint: string) => async (params: any): Promise<any> => {
-  const uri = `https://${config.logsServerAddress}/v1/${endpoint}/?`
+  const {logsServerAddress} = config // Deconstruct logsServerAddress from config
+  let uri // Initialize variable for the URI
+  // Conditionals to check dev or production environment
+  if (logsServerAddress.includes('localhost')) {
+    uri = `http://${logsServerAddress}/v1/${endpoint}/?` // URI starts with http
+  } else {
+    uri = `https://${logsServerAddress}/v1/${endpoint}/?` // URI starts with https
+  }
   const query = Object.keys(params)
     .map(param => {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
