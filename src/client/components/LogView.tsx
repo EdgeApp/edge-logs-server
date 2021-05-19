@@ -31,7 +31,7 @@ class LogView extends Component<LogViewProps, LogViewState> {
     super(props)
     this.state = {
       redirect: false,
-      collapsed: true,
+      collapsed: false,
       log: {}
     }
   }
@@ -86,7 +86,7 @@ class LogView extends Component<LogViewProps, LogViewState> {
           name="Log"
           theme="monokai"
           displayDataTypes={false}
-          collapsed={this.state.collapsed ? 2 : 5}
+          collapsed={this.state.collapsed}
           style={{
             margin: '0 auto',
             width: '100%',
