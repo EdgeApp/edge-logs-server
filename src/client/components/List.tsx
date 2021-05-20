@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import DataTable from 'react-data-table-component'
-import { Link } from 'react-router-dom'
+import { RouteComponentProps, withRouter } from 'react-router-dom'
 
 import { uiButton } from './Buttons'
 
@@ -8,16 +8,21 @@ interface ListProps {
   data: any[]
   loginUser: string
   loginPassword: string
+  history: RouteComponentProps['history']
 }
 
 class List extends Component<ListProps, {}> {
   cellFunction = (row: any, field: string): JSX.Element => {
     return (
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      <Link style={uiButton} to={`/${row._id}`}>
+      <p style={uiButton} data-tag="allowRowEvents">
         {row[field]}
-      </Link>
+      </p>
     )
+  }
+
+  handleRowClicked = (row: any): void => {
+    this.props.history.push(row._id)
   }
 
   render(): JSX.Element {
@@ -58,9 +63,10 @@ class List extends Component<ListProps, {}> {
           pagination
           pointerOnHover
           highlightOnHover
+          onRowClicked={this.handleRowClicked}
         />
       </>
     )
   }
 }
-export default List
+export default withRouter(List)
