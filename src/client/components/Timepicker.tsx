@@ -15,11 +15,11 @@ const calendarText = {
 
 const dateInput = {
   marginLeft: '-2px',
-  fontSize: '16px',
+  fontSize: '14px',
   backgroundColor: 'transparent' as 'transparent',
   border: 'none',
   color: 'white',
-  width: '100px'
+  width: '148px'
 }
 
 interface TimePickerProps {
@@ -40,6 +40,7 @@ class TimePicker extends PureComponent<TimePickerProps, {}> {
           showTimeSelect={timePicker}
           selected={this.props.date}
           onChange={e => this.props.onChange(e)}
+          dateFormat="MMM d, yyyy h:mm aa"
         />
       </div>
     )
