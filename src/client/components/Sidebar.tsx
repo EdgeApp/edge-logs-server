@@ -5,6 +5,15 @@ import { InputText } from './Inputs'
 import Sidetab from './Sidetab'
 import Spinner from './Spinner'
 import TimePicker from './Timepicker'
+import TimezonePicker from './TimezonePicker'
+
+interface TimezoneObj {
+  value: string
+  label: string
+  abbrev: string
+  offset: number
+  altName: string
+}
 
 interface SidebarProps {
   status: number
@@ -21,6 +30,7 @@ interface SidebarState {
   deviceInfo: string
   userMessage: string
   userName: string
+  timezone: TimezoneObj
 }
 type SidebarStateChange = Partial<SidebarState>
 
@@ -39,7 +49,14 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
       deviceOS: '',
       deviceInfo: '',
       userMessage: '',
-      userName: ''
+      userName: '',
+      timezone: {
+        value: 'GMT',
+        label: '(GMT+0:00) UTC',
+        abbrev: 'GMT',
+        offset: 0,
+        altName: 'GMT'
+      }
     }
   }
 
@@ -53,11 +70,23 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
       <MainButton
         label="Search"
         onClick={async () => {
-          const { start, end } = this.state
+          const { start, end, timezone } = this.state
+          // Find offset between local timezone and UTC in milliseconds
+          const localTimezoneOffset = new Date().getTimezoneOffset() * 60 * 1000
+          // Find offset between selected timezone and UTC in milliseconds
+          const selectedTimezoneOffset = timezone.offset * 60 * 60 * 1000
+          // Adjust 'start' date from local timezone to selected timezone
+          const adjustedStart = new Date(
+            start.getTime() - localTimezoneOffset - selectedTimezoneOffset
+          )
+          // Adjust 'end' date from local timezone to selected timezone
+          const adjustedEnd = new Date(
+            end.getTime() - localTimezoneOffset - selectedTimezoneOffset
+          )
           await this.props.getData({
             ...this.state,
-            start: start.getTime() / 1000,
-            end: end.getTime() / 1000,
+            start: adjustedStart.getTime() / 1000,
+            end: adjustedEnd.getTime() / 1000,
             loginUser: this.props.loginUser,
             loginPassword: this.props.loginPassword
           })
@@ -83,6 +112,10 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
               timePicker
               date={this.state.end}
               onChange={end => this.handleChange({ end })}
+            />
+            <TimezonePicker
+              currentTimezone={this.state.timezone.value}
+              onChange={timezone => this.handleChange({ timezone })}
             />
             <SelectButton
               label="Device OS"
