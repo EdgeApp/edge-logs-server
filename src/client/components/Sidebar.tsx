@@ -21,6 +21,7 @@ interface SidebarProps {
   loading: boolean
   getData: Function
   logout: Function
+  onChange: Function
 }
 interface SidebarState {
   start: Date
@@ -79,6 +80,11 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
     this.setState({ ...this.state, ...state })
   }
 
+  handleTimezoneChange(timezone: TimezoneObj): void {
+    this.setState({ ...this.state, timezone })
+    this.props.onChange(timezone)
+  }
+
   renderSearchButton = (props: SidebarProps): JSX.Element => {
     if (props.loading) return <Spinner color="white" />
     return (
@@ -126,7 +132,7 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
             />
             <TimezonePicker
               currentTimezone={this.state.timezone.value}
-              onChange={timezone => this.handleChange({ timezone })}
+              onChange={timezone => this.handleTimezoneChange(timezone)}
             />
             <SelectButton
               label="Device OS"
