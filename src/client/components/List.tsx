@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import DataTable from 'react-data-table-component'
-import { Link } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 
 import { uiButton } from './Buttons'
 
@@ -10,14 +10,30 @@ interface ListProps {
   loginPassword: string
 }
 
-class List extends Component<ListProps, {}> {
+interface ListState {
+  redirect: boolean
+  log: string
+}
+
+class List extends Component<ListProps, ListState> {
+  constructor(props) {
+    super(props)
+    this.state = {
+      redirect: false,
+      log: ''
+    }
+  }
+
   cellFunction = (row: any, field: string): JSX.Element => {
     return (
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      <Link style={uiButton} to={`/${row._id}`}>
-        {row[field]}
-      </Link>
+      <p style={uiButton} data-tag="allowRowEvents">{row[field]}</p>
     )
+  }
+
+  handleRowClicked = (row: any): any => {
+    const log: string = row._id
+    this.setState({ redirect: true, log })
   }
 
   render(): JSX.Element {
@@ -58,7 +74,9 @@ class List extends Component<ListProps, {}> {
           pagination
           pointerOnHover
           highlightOnHover
+          onRowClicked={this.handleRowClicked}
         />
+        {this.state.redirect && <Redirect to={`/${this.state.log}`} push />}
       </>
     )
   }
