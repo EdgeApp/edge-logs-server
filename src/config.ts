@@ -8,8 +8,7 @@ export const asConfig = asObject({
   infoServerAddress: asOptional(asString, 'info1.edge.app'),
   infoServerApiKey: asOptional(asString, ''),
   hostname: asOptional(asString, ''),
-  httpPort: asOptional(asString, ''),
-  logsServerAddress: asOptional(asString, '')
+  httpPort: asOptional(asString, '')
 })
 
 export const config = makeConfig(asConfig)
