@@ -1,21 +1,25 @@
+import DateTime from 'luxon/src/datetime.js'
 import React, { Component } from 'react'
 import ReactJson from 'react-json-view'
 import { Link, Redirect, withRouter } from 'react-router-dom'
 
 import { fetchLog } from '../util'
 import { CollapseButton } from './Buttons'
+import { TimezoneObj } from './Sidebar'
 
 interface LogViewProps {
   match: any
   status: number
   loginUser: string
   loginPassword: string
+  timezone: TimezoneObj
 }
 
 interface LogViewState {
   redirect: boolean
   collapsed: boolean
   log: any
+  timezone: TimezoneObj
 }
 
 const logViewStyle = {
@@ -32,7 +36,8 @@ class LogView extends Component<LogViewProps, LogViewState> {
     this.state = {
       redirect: false,
       collapsed: false,
-      log: {}
+      log: {},
+      timezone: props.timezone
     }
   }
 
@@ -63,12 +68,21 @@ class LogView extends Component<LogViewProps, LogViewState> {
     })
   }
 
+  findShiftedTimezoneDate = (logTimestamp, timezoneName): string => {
+    const logDateUtc = new Date(logTimestamp * 1000)
+    return DateTime.fromISO(logDateUtc.toJSON(), { zone: timezoneName }).toISO()
+  }
+
   renderView = (): JSX.Element => {
     if (this.state.redirect || this.props.status === 401) {
       return <Redirect to={{ pathname: '/' }} />
     }
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const rawData = `/raw/${this.props.match.params.logID}`
+    const shiftedTimezoneDate = this.findShiftedTimezoneDate(
+      this.state.log.timestamp,
+      this.state.timezone.value
+    )
     return (
       <div style={logViewStyle}>
         <Link style={linkStyle} to="/">
@@ -82,7 +96,7 @@ class LogView extends Component<LogViewProps, LogViewState> {
           onClick={() => this.setState({ collapsed: !this.state.collapsed })}
         />
         <ReactJson
-          src={this.state.log}
+          src={{ shiftedTimezoneDate: shiftedTimezoneDate, ...this.state.log }}
           name="Log"
           theme="monokai"
           displayDataTypes={false}
