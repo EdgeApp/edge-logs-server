@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import ReactJson from 'react-json-view'
 import { Link, Redirect, withRouter } from 'react-router-dom'
 
-import { fetchLog } from '../../util'
+import { fetchLog } from '../util'
 import { CollapseButton } from './Buttons'
 
 interface LogViewProps {
