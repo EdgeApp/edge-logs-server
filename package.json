@@ -12,7 +12,8 @@
     "precommit": "lint-staged && yarn prepare",
     "prepare": "configure && yarn build",
     "start": "node -r sucrase/register src/indexApi.ts",
-    "client": "parcel serve src/client/index.html --open",
+    "dev": "npm-run-all -p client start",
+    "client": "parcel serve src/client/index.html",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx ."
   },
   "lint-staged": {
