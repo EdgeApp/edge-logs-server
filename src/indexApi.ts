@@ -120,6 +120,7 @@ interface Selector {
 }
 
 const nanoDb = nano(config.couchDbFullpath)
+const limit = config.payloadLimitMb
 
 function api(): void {
   // start express and couch db server
@@ -127,7 +128,7 @@ function api(): void {
   const logsRecords = nanoDb.use('logs_records')
   const logsLogin = nanoDb.use('logs_login')
 
-  app.use(express.json({ limit: '8mb' }))
+  app.use(express.json({ limit }))
   app.use(cors())
   app.use(cookieParser())
   app.use('/', express.static('dist'))
