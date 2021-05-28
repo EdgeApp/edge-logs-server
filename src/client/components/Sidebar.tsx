@@ -80,7 +80,7 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
     this.setState({ ...this.state, ...state })
   }
 
-  handleTimezoneChange(timezone: TimezoneObj): void {
+  handleTimezoneChange = (timezone: TimezoneObj): void => {
     this.setState({ ...this.state, timezone })
     this.props.onChange(timezone)
   }
@@ -132,7 +132,7 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
             />
             <TimezonePicker
               currentTimezone={this.state.timezone.value}
-              onChange={timezone => this.handleTimezoneChange(timezone)}
+              onChange={this.handleTimezoneChange}
             />
             <SelectButton
               label="Device OS"
