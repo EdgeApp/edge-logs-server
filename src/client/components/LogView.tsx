@@ -68,21 +68,16 @@ class LogView extends Component<LogViewProps, LogViewState> {
     })
   }
 
-  findShiftedTimezoneDate = (logTimestamp, timezoneName): string => {
-    const logDateUtc = new Date(logTimestamp * 1000)
-    return DateTime.fromISO(logDateUtc.toJSON(), { zone: timezoneName }).toISO()
-  }
-
   renderView = (): JSX.Element => {
     if (this.state.redirect || this.props.status === 401) {
       return <Redirect to={{ pathname: '/' }} />
     }
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const rawData = `/raw/${this.props.match.params.logID}`
-    const shiftedTimezoneDate = this.findShiftedTimezoneDate(
-      this.state.log.timestamp,
-      this.state.timezone.value
-    )
+    const logDateUtc = new Date(this.state.log.timestamp * 1000)
+    const shiftedTimezoneDate = DateTime.fromISO(logDateUtc.toJSON(), {
+      zone: this.state.timezone.value
+    }).toISO()
     return (
       <div style={logViewStyle}>
         <Link style={linkStyle} to="/">
@@ -96,7 +91,7 @@ class LogView extends Component<LogViewProps, LogViewState> {
           onClick={() => this.setState({ collapsed: !this.state.collapsed })}
         />
         <ReactJson
-          src={{ shiftedTimezoneDate: shiftedTimezoneDate, ...this.state.log }}
+          src={{ shiftedTimezoneDate, ...this.state.log }}
           name="Log"
           theme="monokai"
           displayDataTypes={false}
