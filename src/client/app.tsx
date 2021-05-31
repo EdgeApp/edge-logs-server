@@ -8,7 +8,7 @@ import List from './components/List'
 import LoginScreen from './components/LoginScreen'
 import LogView from './components/LogView'
 import RawLogView from './components/RawLogView'
-import Sidebar from './components/Sidebar'
+import Sidebar, { initTimezone, TimezoneObj } from './components/Sidebar'
 import { searchLogs, SearchLogsParams } from './util'
 
 interface AppState {
@@ -18,6 +18,7 @@ interface AppState {
   loginMessage: string
   loginUser: string
   loginPassword: string
+  timezone: TimezoneObj
 }
 type AppStateChange = Partial<AppState>
 
@@ -59,7 +60,8 @@ class App extends Component<{}, AppState> {
       data: [],
       loginMessage: 'Enter Username/Password',
       loginUser: '',
-      loginPassword: ''
+      loginPassword: '',
+      timezone: initTimezone
     }
   }
 
@@ -186,6 +188,7 @@ class App extends Component<{}, AppState> {
               loading={this.state.loading}
               getData={this.getData}
               logout={this.logout}
+              onChange={timezone => this.handleChange({ timezone })}
             />
             <Route
               path="/:logID"
@@ -195,6 +198,7 @@ class App extends Component<{}, AppState> {
                   status={this.state.status}
                   loginUser={this.state.loginUser}
                   loginPassword={this.state.loginPassword}
+                  timezone={this.state.timezone}
                 />
               }
             />
