@@ -313,4 +313,7 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(e => console.log(e))
+main().catch(e => {
+  console.error(e)
+  process.exit(1)
+})
