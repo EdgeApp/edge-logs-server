@@ -17,9 +17,12 @@ import {
 } from 'edge-server-tools'
 import express from 'express'
 import nano from 'nano'
+import pino from 'pino'
 
 import { config } from './config'
 import { couchSchema } from './couchSchema'
+
+const logger = pino()
 
 const AUTOREPLICATION_DELAY = 1000 * 60 * 30 // 30 minutes
 const FIVE_MINUTES = 1000 * 60 * 5
@@ -217,7 +220,7 @@ function api(): void {
       if (!withData) delete cleanedLog.data
       res.json(cleanedLog)
     } catch (e) {
-      console.log(e)
+      logger.warn(e)
       if (e != null && e.error === 'not_found') {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         res.status(404).send(`Could not find log with _id: ${_id}.`)
@@ -282,20 +285,20 @@ function api(): void {
       const result = await logsRecords.find(query)
       return res.json(result.docs)
     } catch (e) {
-      console.log(e)
+      logger.warn(e)
       return res.status(500).send('Internal Server Error.')
     }
   })
 
   app.listen(config.httpPort, function () {
-    console.log(`Server started on Port ${config.httpPort}`)
+    logger.info(`Server started on Port ${config.httpPort}`)
   })
 }
 
 async function main(): Promise<void> {
   const { couchDbFullpath, infoServerAddress, infoServerApiKey } = config
   if (cluster.isMaster) {
-    await rebuildCouch(couchDbFullpath, couchSchema).catch(e => console.log(e))
+    await rebuildCouch(couchDbFullpath, couchSchema).catch(e => logger.error(e))
     const task = makePeriodicTask(
       async () =>
         await autoReplication(
@@ -303,7 +306,7 @@ async function main(): Promise<void> {
           'logsServer',
           infoServerApiKey,
           couchDbFullpath
-        ).catch(e => console.log(e)),
+        ).catch(e => logger.error(e)),
       AUTOREPLICATION_DELAY
     )
     task.start()
@@ -314,6 +317,6 @@ async function main(): Promise<void> {
 }
 
 main().catch(e => {
-  console.error(e)
+  logger.fatal(e)
   process.exit(1)
 })
