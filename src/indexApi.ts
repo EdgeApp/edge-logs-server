@@ -281,8 +281,9 @@ function api(): void {
     }
   })
 
-  app.listen(config.httpPort, function () {
-    console.log(`Server started on Port ${config.httpPort}`)
+  const { listenPort, listenHost } = config
+  app.listen(listenPort, listenHost, () => {
+    console.log(`Server started on Port ${listenPort}`)
   })
 }
 

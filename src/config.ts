@@ -1,15 +1,16 @@
 import { makeConfig } from 'cleaner-config'
-import { asObject, asOptional, asString } from 'cleaners'
+import { asNumber, asObject, asOptional, asString } from 'cleaners'
 
 export const asConfig = asObject({
+  // HTTP server options:
+  listenHost: asOptional(asString, '127.0.0.1'),
+  listenPort: asOptional(asNumber, 8000),
+  payloadLimitMb: asOptional(asString, '16mb'),
+
+  // External resources:
   couchDbFullpath: asOptional(asString, 'http://admin:admin@localhost:5984'),
-  dbUsername: asOptional(asString, 'username'),
-  dbPassword: asOptional(asString, 'password'),
   infoServerAddress: asOptional(asString, 'info1.edge.app'),
-  infoServerApiKey: asOptional(asString, ''),
-  hostname: asOptional(asString, ''),
-  httpPort: asOptional(asString, ''),
-  payloadLimitMb: asOptional(asString, '16mb')
+  infoServerApiKey: asOptional(asString, '')
 })
 
 export const config = makeConfig(asConfig)
