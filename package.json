@@ -12,9 +12,10 @@
     "dev": "npm-run-all -p client start",
     "fix": "yarn lint -- --fix",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
-    "precommit": "lint-staged && yarn prepare",
+    "precommit": "lint-staged && npm-run-all types prepare",
     "prepare": "configure && yarn build",
-    "start": "node -r sucrase/register src/indexApi.ts"
+    "start": "node -r sucrase/register src/indexApi.ts",
+    "types": "tsc"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "eslint"
