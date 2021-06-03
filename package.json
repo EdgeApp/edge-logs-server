@@ -8,12 +8,14 @@
   "author": "Airbitz, Inc.",
   "scripts": {
     "build": "sucrase -q -t typescript,imports,jsx -d ./lib ./src",
+    "clean": "rimraf dist lib",
     "client": "parcel serve src/client/index.html",
+    "configure": "configure",
     "dev": "npm-run-all -p client start",
-    "fix": "yarn lint -- --fix",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
+    "fix": "eslint . --fix",
+    "lint": "eslint .",
     "precommit": "lint-staged && npm-run-all types prepare",
-    "prepare": "husky install && configure && yarn build",
+    "prepare": "husky install && npm-run-all clean configure build",
     "start": "node -r sucrase/register src/indexApi.ts",
     "types": "tsc"
   },
@@ -62,6 +64,7 @@
     "prettier": "^2.2.1",
     "react": ">= 16.3.0",
     "react-dom": "^16.0.0 || ^15.5.4",
+    "rimraf": "^3.0.2",
     "sucrase": "^3.12.1",
     "typescript": "^4.2.3"
   }
