@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+
 import {
   asArray,
   asNumber,
@@ -16,7 +18,7 @@ import {
   rebuildCouch
 } from 'edge-server-tools'
 import express from 'express'
-import nano from 'nano'
+import nano, { MangoSelector } from 'nano'
 
 import { config } from './config'
 import { couchSchema } from './couchSchema'
@@ -111,14 +113,6 @@ const asLoginReq = asObject({
   authKey: asString
 })
 
-interface Selector {
-  timestamp: { $gte: number; $lt: number }
-  OS?: { $regex: string }
-  deviceInfo?: { $regex: string }
-  userMessage?: { $regex: string }
-  userName?: { $eq: string }
-}
-
 const nanoDb = nano(config.couchDbFullpath)
 const limit = config.payloadLimitMb
 
@@ -186,6 +180,7 @@ function api(): void {
       loginData.loginPassword = req.cookies?.loginPassword
     const { loginUser, loginPassword } = loginData
     try {
+      // @ts-expect-error
       const loginDoc = await logsLogin.get(loginUser)
       const cleanLogin = asLoginReq(loginDoc)
       if (cleanLogin.authKey !== loginPassword) throw new Error()
@@ -255,7 +250,7 @@ function api(): void {
       return
     }
 
-    const selector: Selector = {
+    const selector: MangoSelector = {
       timestamp: { $gte: startTimestamp, $lt: endTimestamp }
     }
     if (deviceOS !== undefined) {
@@ -278,7 +273,6 @@ function api(): void {
     }
 
     try {
-      // @ts-expect-error
       const result = await logsRecords.find(query)
       return res.json(result.docs)
     } catch (e) {
@@ -287,8 +281,9 @@ function api(): void {
     }
   })
 
-  app.listen(config.httpPort, function () {
-    console.log(`Server started on Port ${config.httpPort}`)
+  const { listenPort, listenHost } = config
+  app.listen(listenPort, listenHost, () => {
+    console.log(`Server started on Port ${listenPort}`)
   })
 }
 
