@@ -1,9 +1,9 @@
 import { makeConfig } from 'cleaner-config'
-import { asNumber, asObject, asOptional, asString } from 'cleaners'
+import { asNumber, asObject, asOptional, asString, Cleaner } from 'cleaners'
 
 // Custom cleaners:
 
-const asNumberString = (raw: unknown): string => {
+const asNumberString: Cleaner<string> = raw => {
   const numStr = asString(raw)
   if (!/^\d+(?:.\d+)$/.test(numStr)) {
     throw TypeError('Expected number string')
