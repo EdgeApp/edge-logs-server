@@ -30,4 +30,4 @@ COPY pm2.json .
 # Build project files copied
 RUN yarn build
 
-CMD [ "pm2", "start", "pm2.json" ]
+CMD [ "pm2-runtime", "pm2.json" ]
