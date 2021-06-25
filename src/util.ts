@@ -19,7 +19,7 @@ export interface FetchLogParams {
 }
 
 const fetchApi = (endpoint: string) => async (params: any): Promise<any> => {
-  const uri = `https://${config.logsServerAddress}/v1/${endpoint}/?`
+  const uri = `/v1/${endpoint}/?`
   const query = Object.keys(params)
     .map(param => {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

@@ -9,6 +9,7 @@ import List from './components/List'
 import LoginScreen from './components/LoginScreen'
 import LogView from './components/LogView'
 import RawLogView from './components/RawLogView'
+import SearchView from './components/SearchView'
 import Sidebar from './components/Sidebar'
 
 interface AppState {
@@ -21,11 +22,25 @@ interface AppState {
 }
 type AppStateChange = Partial<AppState>
 
-interface SearchParams {
-  loginUser: string
+export interface SearchParams {
+  loginUser?: string
   loginPassword?: string
-  start: number
-  end: number
+  start?: number
+  end?: number
+  deviceOS?: string
+  deviceInfo?: string
+  userMessage?: string
+  userName?: string
+}
+
+interface APIGet {
+  status: number
+  data: any[]
+}
+
+interface ParsedParams {
+  start: number | string
+  end: number | string
   deviceOs?: string
   deviceInfo?: string
   userMessage?: string
@@ -73,13 +88,13 @@ class App extends Component<{}, AppState> {
       loginUser: this.state.loginUser,
       loginPassword: this.state.loginPassword
     })
-    if (status === 200) {
+    if (status.status === 200) {
       this.setState({
         status: 200
       })
     }
     if (
-      status !== 200 &&
+      status.status !== 200 &&
       (this.state.loginUser !== '' || this.state.loginPassword !== '')
     ) {
       this.setState({ loginMessage: 'Bad Username/Password' })
@@ -90,7 +105,7 @@ class App extends Component<{}, AppState> {
     this.setState({ ...this.state, ...state })
   }
 
-  getData = async (params: SearchLogsParams): Promise<number> => {
+  getData = async (params: any): Promise<APIGet> => {
     console.time('getData')
     this.setState({ loading: true })
     let response
@@ -106,13 +121,13 @@ class App extends Component<{}, AppState> {
       })
     }
     console.timeEnd('getData')
-    return response.status
+    return response
   }
 
-  login = async (params: SearchParams): Promise<void> => {
+  login = async (params: any): Promise<void> => {
     console.time('login')
     const response = await this.getData(params)
-    if (response === 200) {
+    if (response.status === 200) {
       this.setState({
         status: 200
       })
@@ -128,12 +143,43 @@ class App extends Component<{}, AppState> {
     })
     this.setState({
       loading: false,
-      status: response,
+      status: response.status,
       data: [],
       loginMessage: 'Enter Username/Password',
       loginUser: '',
       loginPassword: ''
     })
+  }
+
+  paramParser = (url): object => {
+    const urlParams = new URLSearchParams(url)
+
+    const start =
+      urlParams.get('start') === null
+        ? ''
+        : parseInt(urlParams.get('start'), 10)
+    const end =
+      urlParams.get('end') === null ? '' : parseInt(urlParams.get('end'), 10)
+    const deviceOS =
+      urlParams.get('deviceOS') === null ? '' : urlParams.get('deviceOS')
+    const deviceInfo =
+      urlParams.get('deviceInfo') === null ? '' : urlParams.get('deviceInfo')
+    const userMessage =
+      urlParams.get('userMessage') === null ? '' : urlParams.get('userMessage')
+    const userName =
+      urlParams.get('userName') === null ? '' : urlParams.get('userName')
+
+    const parsedParams = {
+      start: start / 1000,
+      end: end / 1000,
+      deviceOS: deviceOS,
+      deviceInfo: deviceInfo,
+      userMessage: userMessage,
+      userName: userName
+    }
+
+    console.log('parsed', parsedParams)
+    return parsedParams
   }
 
   renderMainView = (): JSX.Element => {
@@ -154,14 +200,30 @@ class App extends Component<{}, AppState> {
         />
       )
     }
+    console.log('pre login info', this.paramParser(window.location.href))
+
+    const parsedParams: SearchParams = {
+      ...this.paramParser(window.location.href),
+      loginUser: this.state.loginUser,
+      loginPassword: this.state.loginPassword
+    }
+    console.log('post login info', parsedParams)
     return (
       <List
-        data={this.state.data}
+        getData={this.getData}
+        parsedParams={parsedParams}
         loginUser={this.state.loginUser}
         loginPassword={this.state.loginPassword}
       />
     )
   }
+
+  // <Route
+  //   exact
+  //   path="/"
+  //   // eslint-disable-next-line react/no-children-prop
+  //   children={this.renderMainView}
+  // />
 
   render(): JSX.Element {
     return (
@@ -178,33 +240,56 @@ class App extends Component<{}, AppState> {
               />
             }
           />
-          <div style={row}>
-            <Sidebar
-              status={this.state.status}
-              loginUser={this.state.loginUser}
-              loginPassword={this.state.loginPassword}
-              loading={this.state.loading}
-              getData={this.getData}
-              logout={this.logout}
-            />
-            <Route
-              path="/:logID"
-              // eslint-disable-next-line react/no-children-prop
-              children={
-                <LogView
-                  status={this.state.status}
-                  loginUser={this.state.loginUser}
-                  loginPassword={this.state.loginPassword}
-                />
-              }
-            />
-            <Route
-              exact
-              path="/"
-              // eslint-disable-next-line react/no-children-prop
-              children={this.renderMainView()}
-            />
-          </div>
+          <>
+            <div style={row}>
+              <Sidebar
+                status={this.state.status}
+                loginUser={this.state.loginUser}
+                loginPassword={this.state.loginPassword}
+                loading={this.state.loading}
+                getData={this.getData}
+                logout={this.logout}
+              />
+              <Route
+                path="/:logID"
+                // eslint-disable-next-line react/no-children-prop
+                children={
+                  <LogView
+                    status={this.state.status}
+                    loginUser={this.state.loginUser}
+                    loginPassword={this.state.loginPassword}
+                  />
+                }
+              />
+              {/* <Route
+                path="/?:searchParams"
+                // eslint-disable-next-line react/no-children-prop
+                children={
+                  <SearchView
+                    status={this.state.status}
+                    loginUser={this.state.loginUser}
+                    loginPassword={this.state.loginPassword}
+                    loginMessage={this.state.loginMessage}
+                    loading={this.state.loading}
+                    getData={this.getData}
+                    logout={this.logout}
+                    login={this.login}
+                  />
+                }
+              /> */}
+              <Route
+                path="/?:searchParams"
+                // eslint-disable-next-line react/no-children-prop
+                children={this.renderMainView}
+              />
+              {/* <Route
+                exact
+                path="/"
+                // eslint-disable-next-line react/no-children-prop
+                children={this.renderMainView()}
+              /> */}
+            </div>
+          </>
         </Switch>
       </HashRouter>
     )

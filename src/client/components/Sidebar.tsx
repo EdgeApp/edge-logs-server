@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react'
+import { Link } from 'react-router-dom'
 
 import { MainButton, SelectButton } from './Buttons'
 import { InputText } from './Inputs'
@@ -49,20 +50,23 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
 
   renderSearchButton = (props: SidebarProps): JSX.Element => {
     if (props.loading) return <Spinner color="white" />
+    const query = Object.keys(this.state)
+      .map(param => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        if (param === 'start' || param === 'end') {
+          const dateNum = this.state[param].getTime()
+          return `${param}=${dateNum}`
+        } else if (this.state[param] !== '') {
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          return `${param}=${this.state[param]}`
+        }
+        return ''
+      })
+      .join('&')
     return (
-      <MainButton
-        label="Search"
-        onClick={async () => {
-          const { start, end } = this.state
-          await this.props.getData({
-            ...this.state,
-            start: start.getTime() / 1000,
-            end: end.getTime() / 1000,
-            loginUser: this.props.loginUser,
-            loginPassword: this.props.loginPassword
-          })
-        }}
-      />
+      <Link to={`/?&${query}`}>
+        <MainButton label="Search" onClick={async () => {}} />
+      </Link>
     )
   }
 
