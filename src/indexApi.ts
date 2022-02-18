@@ -2,6 +2,7 @@
 
 import {
   asArray,
+  asBoolean,
   asNumber,
   asObject,
   asOptional,
@@ -49,6 +50,7 @@ const asLog = asObject({
       wallets: asArray(
         asObject({
           currencyCode: asString,
+          imported: asOptional(asBoolean),
           repoId: asOptional(asString),
           pluginDump: asOptional(asUnknown)
         })
@@ -83,6 +85,7 @@ const retrievedLogObj = {
       wallets: asArray(
         asObject({
           currencyCode: asString,
+          imported: asOptional(asBoolean),
           repoId: asOptional(asString),
           pluginDump: asOptional(asUnknown)
         })
@@ -231,14 +234,8 @@ function api(): void {
       return
     }
 
-    const {
-      start,
-      end,
-      deviceOS,
-      deviceInfo,
-      userMessage,
-      userName
-    } = logsQuery
+    const { start, end, deviceOS, deviceInfo, userMessage, userName } =
+      logsQuery
     const startTimestamp = parseFloat(start)
     const endTimestamp = parseFloat(end)
     if (
