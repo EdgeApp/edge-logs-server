@@ -35,7 +35,7 @@ class LogView extends Component<LogViewProps, LogViewState> {
     super(props)
     this.state = {
       redirect: false,
-      collapsed: false,
+      collapsed: true,
       log: {},
       timezone: props.timezone
     }
