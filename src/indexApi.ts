@@ -54,6 +54,12 @@ const asLog = asObject({
           repoId: asOptional(asString),
           pluginDump: asOptional(asUnknown)
         })
+      ),
+      actions: asArray(
+        asObject({
+          program: asUnknown,
+          state: asUnknown
+        })
       )
     })
   ),
@@ -88,6 +94,12 @@ const retrievedLogObj = {
           imported: asOptional(asBoolean),
           repoId: asOptional(asString),
           pluginDump: asOptional(asUnknown)
+        })
+      ),
+      actions: asArray(
+        asObject({
+          program: asUnknown,
+          state: asUnknown
         })
       )
     })
@@ -214,7 +226,7 @@ function api(): void {
       const cleanedLog = asRetrievedLog(log)
       if (!withData) delete cleanedLog.data
       res.json(cleanedLog)
-    } catch (e) {
+    } catch (e: any) {
       console.log(e)
       if (e != null && e.error === 'not_found') {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
