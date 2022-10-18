@@ -55,11 +55,13 @@ const asLog = asObject({
           pluginDump: asOptional(asUnknown)
         })
       ),
-      actions: asArray(
-        asObject({
-          program: asUnknown,
-          state: asUnknown
-        })
+      actions: asOptional(
+        asArray(
+          asObject({
+            program: asUnknown,
+            state: asUnknown
+          })
+        )
       )
     })
   ),
@@ -96,11 +98,13 @@ const retrievedLogObj = {
           pluginDump: asOptional(asUnknown)
         })
       ),
-      actions: asArray(
-        asObject({
-          program: asUnknown,
-          state: asUnknown
-        })
+      actions: asOptional(
+        asArray(
+          asObject({
+            program: asUnknown,
+            state: asUnknown
+          })
+        )
       )
     })
   ),
