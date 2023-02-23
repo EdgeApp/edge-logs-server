@@ -145,6 +145,11 @@ function api(): void {
     next()
   })
 
+  app.use((req, res, next) => {
+    logger(req.ip, req.url)
+    next()
+  })
+
   app.put(`/v1/log/`, async function (req, res) {
     let log: ReturnType<typeof asLog>
     try {
@@ -183,6 +188,7 @@ function api(): void {
   app.use(async function (req, res, next) {
     const loginData = req.query ?? req.body ?? {}
     if (loginData.loginUser === 'logout') {
+      logger(`logout: ${loginData.loginUser as string}`)
       res.cookie('loginUser', '')
       res.cookie('loginPassword', '')
       return res.status(401).send(`Logout`)
@@ -193,13 +199,15 @@ function api(): void {
       loginData.loginPassword = req.cookies?.loginPassword
     const { loginUser, loginPassword } = loginData
     try {
-      const loginDoc = await logsLogin.get(loginUser)
+      const loginDoc = await logsLogin.get(loginUser as string)
       const cleanLogin = asLoginReq(loginDoc)
       if (cleanLogin.authKey !== loginPassword) throw new Error()
+      logger(`login: ${loginData.loginUser as string}`)
       res.cookie('loginUser', loginUser)
       res.cookie('loginPassword', loginPassword)
       next()
     } catch {
+      logger(`login failed: ${loginData.loginUser as string}`)
       res.cookie('loginUser', '')
       res.cookie('loginPassword', '')
       res.status(401).send(`Bad Login Info.`)

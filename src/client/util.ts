@@ -38,3 +38,7 @@ const fetchApi =
 
 export const searchLogs = fetchApi('findLogs')
 export const fetchLog = fetchApi('getLog')
+export const logger = (...args: any): void => {
+  const date = new Date().toISOString().slice(5, 19)
+  console.log(date, ...args)
+}
