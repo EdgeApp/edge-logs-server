@@ -178,8 +178,12 @@ function api(): void {
     }
     let isoDate = new Date().toISOString()
     if (log.isoDate != null) {
-      isoDate = log.isoDate
-      const logMilliseconds = new Date(isoDate).getTime()
+      const date = new Date(log.isoDate)
+      const logMilliseconds = date.getTime()
+      if (isNaN(logMilliseconds)) {
+        return res.status(400).send('Invalid time')
+      }
+      isoDate = new Date(log.isoDate).toISOString()
       const currentMilliseconds = new Date().getTime()
       if (
         logMilliseconds > currentMilliseconds + FIVE_MINUTES ||
