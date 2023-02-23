@@ -16,9 +16,26 @@ import { forkChildren, setupDatabase } from 'edge-server-tools'
 import express from 'express'
 import nano, { MangoSelector } from 'nano'
 
+import { logger } from './client/util'
 import { config } from './config'
 import { setupInfos } from './couchSchema'
 
+const KEY_WORDS = [
+  'allKeys',
+  'otpKey',
+  'loginKey',
+  'publicWalletInfo',
+  'recoveryKey',
+  'displayPrivateSeed',
+  'displayPublicSeed',
+  'bitcoinKey',
+  'dashKey',
+  'litecoinKey',
+  'bitcoincashKey',
+  'ethereumKey',
+  'moneroMnemonic',
+  'ethereumMnemonic'
+]
 const FIVE_MINUTES = 1000 * 60 * 5
 
 const asLog = asObject({
@@ -154,8 +171,10 @@ function api(): void {
     let log: ReturnType<typeof asLog>
     try {
       log = asLog(req.body)
-    } catch {
-      return res.status(400).send(`Bad Log Fields`)
+      checkForKeys(req.body)
+    } catch (e: any) {
+      const message: string = e.message
+      return res.status(400).send(message)
     }
     let isoDate = new Date().toISOString()
     if (log.isoDate != null) {
@@ -302,6 +321,14 @@ function api(): void {
   })
 }
 
+function checkForKeys(data: any): void {
+  const dataString = JSON.stringify(data)
+  KEY_WORDS.forEach(word => {
+    if (dataString.includes(word)) {
+      throw new Error('Log includes sensitive data')
+    }
+  })
+}
 async function main(): Promise<void> {
   const { couchDbFullpath } = config
   if (cluster.isPrimary) {
