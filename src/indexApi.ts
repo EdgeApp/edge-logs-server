@@ -19,6 +19,7 @@ import nano, { MangoSelector } from 'nano'
 import { logger } from './client/util'
 import { config } from './config'
 import { setupInfos } from './couchSchema'
+import { slackPoster } from './postToSlack'
 
 const KEY_WORDS = [
   'allKeys',
@@ -329,6 +330,9 @@ function checkForKeys(data: any): void {
   const dataString = JSON.stringify(data)
   KEY_WORDS.forEach(word => {
     if (dataString.includes(word)) {
+      slackPoster('Log attempt rejected due to sensitive data').catch(e =>
+        console.log(e.message)
+      )
       throw new Error('Log includes sensitive data')
     }
   })
