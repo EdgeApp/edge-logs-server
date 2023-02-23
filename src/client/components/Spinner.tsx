@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import Loader from 'react-loader-spinner'
+import { ColorRing } from 'react-loader-spinner'
 
 const loader = {
   textAlign: 'center' as 'center',
@@ -14,12 +14,7 @@ class Spinner extends PureComponent<SpinnerProps, {}> {
   render(): JSX.Element {
     return (
       <div style={loader}>
-        <Loader
-          type="Oval"
-          color={this.props.color}
-          height="30px"
-          width="30px"
-        />
+        <ColorRing height="30px" width="30px" />
       </div>
     )
   }

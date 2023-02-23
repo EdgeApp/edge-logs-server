@@ -90,9 +90,9 @@ class Sidebar extends PureComponent<SidebarProps, SidebarState> {
     return (
       <MainButton
         label="Search"
-        onClick={async () => {
+        onClick={() => {
           const { start, end, timezone } = this.state
-          await this.props.getData({
+          this.props.getData({
             ...this.state,
             start:
               adjustDateToSelectedTimezone(

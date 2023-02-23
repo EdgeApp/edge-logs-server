@@ -12,19 +12,13 @@ import {
 import cluster from 'cluster'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import {
-  autoReplication,
-  forkChildren,
-  makePeriodicTask,
-  rebuildCouch
-} from 'edge-server-tools'
+import { forkChildren, setupDatabase } from 'edge-server-tools'
 import express from 'express'
 import nano, { MangoSelector } from 'nano'
 
 import { config } from './config'
-import { couchSchema } from './couchSchema'
+import { setupInfos } from './couchSchema'
 
-const AUTOREPLICATION_DELAY = 1000 * 60 * 30 // 30 minutes
 const FIVE_MINUTES = 1000 * 60 * 5
 
 const asLog = asObject({
@@ -199,7 +193,6 @@ function api(): void {
       loginData.loginPassword = req.cookies?.loginPassword
     const { loginUser, loginPassword } = loginData
     try {
-      // @ts-expect-error
       const loginDoc = await logsLogin.get(loginUser)
       const cleanLogin = asLoginReq(loginDoc)
       if (cleanLogin.authKey !== loginPassword) throw new Error()
@@ -230,9 +223,10 @@ function api(): void {
       const cleanedLog = asRetrievedLog(log)
       if (!withData) delete cleanedLog.data
       res.json(cleanedLog)
-    } catch (e: any) {
+    } catch (e) {
+      const error: any = e
       console.log(e)
-      if (e != null && e.error === 'not_found') {
+      if (e != null && error.error === 'not_found') {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         res.status(404).send(`Could not find log with _id: ${_id}.`)
       } else {
@@ -301,20 +295,11 @@ function api(): void {
 }
 
 async function main(): Promise<void> {
-  const { couchDbFullpath, infoServerAddress, infoServerApiKey } = config
-  if (cluster.isMaster) {
-    await rebuildCouch(couchDbFullpath, couchSchema).catch(e => console.log(e))
-    const task = makePeriodicTask(
-      async () =>
-        await autoReplication(
-          infoServerAddress,
-          'logsServer',
-          infoServerApiKey,
-          couchDbFullpath
-        ).catch(e => console.log(e)),
-      AUTOREPLICATION_DELAY
-    )
-    task.start()
+  const { couchDbFullpath } = config
+  if (cluster.isPrimary) {
+    for (const setupInfo of setupInfos) {
+      await setupDatabase(couchDbFullpath, setupInfo).catch(e => console.log(e))
+    }
     forkChildren()
   } else {
     api()

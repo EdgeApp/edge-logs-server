@@ -54,10 +54,10 @@ const LoginScreen: any = (props: LoginScreenProps) => {
       <li style={loginUserDiv}>
         <LoginButton
           label="Login"
-          onClick={async () => {
+          onClick={() => {
             const today = new Date().getTime()
             const yesterday = today - 1000 * 60 * 60 * 24
-            await props.getData({
+            props.getData({
               start: yesterday / 1000,
               end: today / 1000,
               loginUser: props.loginUser,

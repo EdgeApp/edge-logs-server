@@ -1,5 +1,7 @@
 /* eslint-disable no-var */
 
+import { DatabaseSetup } from 'edge-server-tools'
+
 /**
  * Describes a single database that should exist.
  */
@@ -25,7 +27,7 @@ export interface CouchDbInfo {
   }>
 }
 
-export const couchSchema: CouchDbInfo[] = [
+export const setupInfos: DatabaseSetup[] = [
   {
     name: 'logs_records'
   },

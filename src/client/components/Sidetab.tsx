@@ -6,6 +6,7 @@ import logo from '../images/logo.png'
 interface SidetabProps {
   appId?: string
   serverName: string
+  children?: React.ReactNode
 }
 
 const logoStyle = {
