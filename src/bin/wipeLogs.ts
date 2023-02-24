@@ -1,6 +1,6 @@
 import nano from 'nano'
 
-import config from '../../config.json'
+import { config } from '../config'
 
 const nanoDb = nano(config.couchDbFullpath)
 const endsWith = '_activity'

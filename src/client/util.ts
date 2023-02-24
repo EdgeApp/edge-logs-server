@@ -16,10 +16,14 @@ export interface FetchLogParams {
   withData?: boolean
 }
 
+const USE_LOCALHOST = false
+
 const fetchApi =
   (endpoint: string) =>
   async (params: any): Promise<any> => {
-    const uri = `${location.origin}/v1/${endpoint}/?`
+    const logsServer = USE_LOCALHOST ? 'http://localhost:8008' : location.origin
+
+    const uri = `${logsServer}/v1/${endpoint}/?`
     const query = Object.keys(params)
       .map(param => {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

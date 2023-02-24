@@ -69,6 +69,10 @@ class App extends Component<{}, AppState> {
     Object.assign(document.body.style, body)
     const today = new Date().getTime()
     const yesterday = today - 1000 * 60 * 60 * 24
+    const { loginUser, loginPassword } = this.state
+    if (loginUser === '' || loginPassword === '') {
+      return
+    }
     const status = await this.getData({
       start: yesterday / 1000,
       end: today / 1000,
@@ -102,13 +106,14 @@ class App extends Component<{}, AppState> {
         loading: false,
         data: response.data
       })
-    } catch {
+    } catch (e: any) {
+      console.log(e.message)
       this.setState({
         loading: false
       })
     }
     console.timeEnd('getData')
-    return response.status
+    return response?.status ?? 404
   }
 
   login = async (params: SearchParams): Promise<void> => {
@@ -118,7 +123,10 @@ class App extends Component<{}, AppState> {
       this.setState({
         status: 200
       })
+    } else {
+      this.setState({ loginMessage: 'Bad Username/Password' })
     }
+
     console.timeEnd('login')
   }
 
@@ -169,17 +177,13 @@ class App extends Component<{}, AppState> {
     return (
       <HashRouter>
         <Switch>
-          <Route
-            path="/raw/:logID"
-            // eslint-disable-next-line react/no-children-prop
-            children={
-              <RawLogView
-                status={this.state.status}
-                loginUser={this.state.loginUser}
-                loginPassword={this.state.loginPassword}
-              />
-            }
-          />
+          <Route path="/raw/:logID">
+            <RawLogView
+              status={this.state.status}
+              loginUser={this.state.loginUser}
+              loginPassword={this.state.loginPassword}
+            />
+          </Route>
           <div style={row}>
             <Sidebar
               status={this.state.status}
@@ -190,24 +194,17 @@ class App extends Component<{}, AppState> {
               logout={this.logout}
               onChange={timezone => this.handleChange({ timezone })}
             />
-            <Route
-              path="/:logID"
-              // eslint-disable-next-line react/no-children-prop
-              children={
-                <LogView
-                  status={this.state.status}
-                  loginUser={this.state.loginUser}
-                  loginPassword={this.state.loginPassword}
-                  timezone={this.state.timezone}
-                />
-              }
-            />
-            <Route
-              exact
-              path="/"
-              // eslint-disable-next-line react/no-children-prop
-              children={this.renderMainView()}
-            />
+            <Route path="/:logID">
+              <LogView
+                status={this.state.status}
+                loginUser={this.state.loginUser}
+                loginPassword={this.state.loginPassword}
+                timezone={this.state.timezone}
+              />
+            </Route>
+            <Route exact path="/">
+              {this.renderMainView()}
+            </Route>
           </div>
         </Switch>
       </HashRouter>
