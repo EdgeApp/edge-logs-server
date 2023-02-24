@@ -2,6 +2,8 @@ import { makeConfig } from 'cleaner-config'
 import { asNumber, asObject, asOptional, asString } from 'cleaners'
 
 export const asConfig = asObject({
+  slackWebhookUrl: asOptional(asString),
+
   // HTTP server options:
   listenHost: asOptional(asString, '127.0.0.1'),
   listenPort: asOptional(asNumber, 8000),

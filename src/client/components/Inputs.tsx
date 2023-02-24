@@ -1,7 +1,5 @@
 import React, { PureComponent, useState } from 'react'
-import TimezoneSelect from 'react-timezone-select'
-
-import { TimezoneObj } from './Sidebar'
+import TimezoneSelect, { ITimezoneOption } from 'react-timezone-select'
 
 interface InputProps {
   lines: number
@@ -65,7 +63,7 @@ export const TimezonePicker = (props: any): JSX.Element => {
   )
 
   // Method to update the timezone information in the component, and in the parent
-  const changeTimezone = (timezone: TimezoneObj): void => {
+  const changeTimezone = (timezone: ITimezoneOption): void => {
     setSelectedTimezone(timezone) // Update 'selectedTimezone' to be the new timezone
     props.onChange(timezone) // Update state in parent component with new timezone
   }

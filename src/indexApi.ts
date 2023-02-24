@@ -12,19 +12,31 @@ import {
 import cluster from 'cluster'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import {
-  autoReplication,
-  forkChildren,
-  makePeriodicTask,
-  rebuildCouch
-} from 'edge-server-tools'
+import { forkChildren, setupDatabase } from 'edge-server-tools'
 import express from 'express'
 import nano, { MangoSelector } from 'nano'
 
+import { logger } from './client/util'
 import { config } from './config'
-import { couchSchema } from './couchSchema'
+import { setupInfos } from './couchSchema'
+import { slackPoster } from './postToSlack'
 
-const AUTOREPLICATION_DELAY = 1000 * 60 * 30 // 30 minutes
+const KEY_WORDS = [
+  'allKeys',
+  'otpKey',
+  'loginKey',
+  'publicWalletInfo',
+  'recoveryKey',
+  'displayPrivateSeed',
+  'displayPublicSeed',
+  'bitcoinKey',
+  'dashKey',
+  'litecoinKey',
+  'bitcoincashKey',
+  'ethereumKey',
+  'moneroMnemonic',
+  'ethereumMnemonic'
+]
 const FIVE_MINUTES = 1000 * 60 * 5
 
 const asLog = asObject({
@@ -151,17 +163,28 @@ function api(): void {
     next()
   })
 
+  app.use((req, res, next) => {
+    logger(req.ip, req.url)
+    next()
+  })
+
   app.put(`/v1/log/`, async function (req, res) {
     let log: ReturnType<typeof asLog>
     try {
       log = asLog(req.body)
-    } catch {
-      return res.status(400).send(`Bad Log Fields`)
+      checkForKeys(req.body)
+    } catch (e: any) {
+      const message: string = e.message
+      return res.status(400).send(message)
     }
     let isoDate = new Date().toISOString()
     if (log.isoDate != null) {
-      isoDate = log.isoDate
-      const logMilliseconds = new Date(isoDate).getTime()
+      const date = new Date(log.isoDate)
+      const logMilliseconds = date.getTime()
+      if (isNaN(logMilliseconds)) {
+        return res.status(400).send('Invalid time')
+      }
+      isoDate = new Date(log.isoDate).toISOString()
       const currentMilliseconds = new Date().getTime()
       if (
         logMilliseconds > currentMilliseconds + FIVE_MINUTES ||
@@ -189,6 +212,7 @@ function api(): void {
   app.use(async function (req, res, next) {
     const loginData = req.query ?? req.body ?? {}
     if (loginData.loginUser === 'logout') {
+      logger(`logout: ${loginData.loginUser as string}`)
       res.cookie('loginUser', '')
       res.cookie('loginPassword', '')
       return res.status(401).send(`Logout`)
@@ -199,14 +223,15 @@ function api(): void {
       loginData.loginPassword = req.cookies?.loginPassword
     const { loginUser, loginPassword } = loginData
     try {
-      // @ts-expect-error
-      const loginDoc = await logsLogin.get(loginUser)
+      const loginDoc = await logsLogin.get(loginUser as string)
       const cleanLogin = asLoginReq(loginDoc)
       if (cleanLogin.authKey !== loginPassword) throw new Error()
+      logger(`login: ${loginData.loginUser as string}`)
       res.cookie('loginUser', loginUser)
       res.cookie('loginPassword', loginPassword)
       next()
     } catch {
+      logger(`login failed: ${loginData.loginUser as string}`)
       res.cookie('loginUser', '')
       res.cookie('loginPassword', '')
       res.status(401).send(`Bad Login Info.`)
@@ -230,9 +255,10 @@ function api(): void {
       const cleanedLog = asRetrievedLog(log)
       if (!withData) delete cleanedLog.data
       res.json(cleanedLog)
-    } catch (e: any) {
+    } catch (e) {
+      const error: any = e
       console.log(e)
-      if (e != null && e.error === 'not_found') {
+      if (e != null && error.error === 'not_found') {
         // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         res.status(404).send(`Could not find log with _id: ${_id}.`)
       } else {
@@ -300,21 +326,23 @@ function api(): void {
   })
 }
 
+function checkForKeys(data: any): void {
+  const dataString = JSON.stringify(data)
+  KEY_WORDS.forEach(word => {
+    if (dataString.includes(word)) {
+      slackPoster('Log attempt rejected due to sensitive data').catch(e =>
+        console.log(e.message)
+      )
+      throw new Error('Log includes sensitive data')
+    }
+  })
+}
 async function main(): Promise<void> {
-  const { couchDbFullpath, infoServerAddress, infoServerApiKey } = config
-  if (cluster.isMaster) {
-    await rebuildCouch(couchDbFullpath, couchSchema).catch(e => console.log(e))
-    const task = makePeriodicTask(
-      async () =>
-        await autoReplication(
-          infoServerAddress,
-          'logsServer',
-          infoServerApiKey,
-          couchDbFullpath
-        ).catch(e => console.log(e)),
-      AUTOREPLICATION_DELAY
-    )
-    task.start()
+  const { couchDbFullpath } = config
+  if (cluster.isPrimary) {
+    for (const setupInfo of setupInfos) {
+      await setupDatabase(couchDbFullpath, setupInfo).catch(e => console.log(e))
+    }
     forkChildren()
   } else {
     api()

@@ -26,7 +26,7 @@ class List extends Component<ListProps, {}> {
   }
 
   render(): JSX.Element {
-    const columns = [
+    const columns: any = [
       {
         name: 'Log ID',
         selector: '_id',
@@ -58,7 +58,7 @@ class List extends Component<ListProps, {}> {
         <DataTable
           columns={columns}
           data={this.props.data}
-          defaultSortField="_id"
+          defaultSortFieldId="_id"
           noHeader
           pagination
           pointerOnHover
