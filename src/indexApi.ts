@@ -22,20 +22,51 @@ import { setupInfos } from './couchSchema'
 import { slackPoster } from './postToSlack'
 
 const KEY_WORDS = [
+  'avalancheKey',
+  'avalancheMnemonic',
+  'binanceMnemonic',
+  'binanceKey',
+  'binancesmartchainMnemonic',
+  'binancesmartchainKey',
+  'bitcoinKey',
+  'bitcoincashKey',
+  'celoMnemonic',
+  'celoKey',
+  'dashKey',
+  'eosOwnerKey',
+  'eosKey',
+  'ethDevKey',
+  'ethDevMnemonic',
+  'ethereumclassicKey',
+  'ethereumclassicMnemonic',
+  'ethereumKey',
+  'ethereumMnemonic',
+  'ethereumpowKey',
+  'ethereumpowMnemonic',
+  'fantomKey',
+  'fantomMnemonic',
+  'hederaMnemonic',
+  'hederaKey',
+  'litecoinKey',
+  'moneroMnemonic',
+  'mnemonic',
+  'optimismKey',
+  'optimismMnemonic',
+  'polkadotKey',
+  'polkadotMnemonic',
+  'rskKey',
+  'rskMnemonic',
+  'solanaKey',
+  'solanaMnemonic',
+  'stellarKey',
+  '------------------ Internal Edge Key Names ------------------',
   'allKeys',
-  'otpKey',
-  'loginKey',
-  'publicWalletInfo',
-  'recoveryKey',
   'displayPrivateSeed',
   'displayPublicSeed',
-  'bitcoinKey',
-  'dashKey',
-  'litecoinKey',
-  'bitcoincashKey',
-  'ethereumKey',
-  'moneroMnemonic',
-  'ethereumMnemonic'
+  'publicWalletInfo',
+  'otpKey',
+  'loginKey',
+  'recoveryKey'
 ]
 const FIVE_MINUTES = 1000 * 60 * 5
 
@@ -328,14 +359,18 @@ function api(): void {
 
 function checkForKeys(data: any): void {
   const dataString = JSON.stringify(data)
+  let badWords = ''
   KEY_WORDS.forEach(word => {
     if (dataString.includes(word)) {
-      slackPoster('Log attempt rejected due to sensitive data').catch(e =>
-        console.log(e.message)
-      )
-      throw new Error('Log includes sensitive data')
+      badWords += word + ' '
     }
   })
+  if (badWords !== '') {
+    slackPoster(`Log attempt rejected due to sensitive data ${badWords}`).catch(
+      e => console.log(e.message)
+    )
+    throw new Error('Log includes sensitive data')
+  }
 }
 async function main(): Promise<void> {
   const { couchDbFullpath } = config

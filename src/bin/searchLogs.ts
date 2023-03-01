@@ -3,9 +3,9 @@ import nano from 'nano'
 import { config } from '../config'
 const nanoDb = nano(config.couchDbFullpath)
 
-const searchTerm = process.argv[2]
+const searchTerms = process.argv.slice(2)
 
-if (searchTerm == null) {
+if (searchTerms[0] == null) {
   console.log('Missing search term')
   process.exit(1)
 }
@@ -40,8 +40,15 @@ async function main(): Promise<void> {
       end = doc._id
 
       const s = JSON.stringify(doc)
-      if (s.includes(searchTerm ?? '')) {
-        console.log(`Search item found in ${doc._id}`)
+      let found = true
+      for (const searchTerm of searchTerms) {
+        if (!s.includes(searchTerm ?? '')) {
+          found = false
+          break
+        }
+      }
+      if (found) {
+        console.log(`Search items found in ${doc._id}`)
       }
     }
     console.log(`Searched ${start} ${end}`)
