@@ -59,7 +59,8 @@ const KEY_WORDS = [
   'solanaKey',
   'solanaMnemonic',
   'stellarKey',
-  '------------------ Internal Edge Key Names ------------------',
+
+  // Internal Edge Key Names
   'allKeys',
   'displayPrivateSeed',
   'displayPublicSeed',
@@ -361,7 +362,9 @@ function checkForKeys(data: any): void {
   const dataString = JSON.stringify(data)
   let badWords = ''
   KEY_WORDS.forEach(word => {
-    if (dataString.includes(word)) {
+    const regexString = `"${word}\\\\*"`
+    const regex = new RegExp(regexString)
+    if (regex.test(dataString)) {
       badWords += word + ' '
     }
   })
