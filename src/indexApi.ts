@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
-
+import { wordlists } from 'bip39'
 import {
   asArray,
   asBoolean,
@@ -373,6 +373,30 @@ function checkForKeys(data: any): void {
       e => console.log(e.message)
     )
     throw new Error('Log includes sensitive data')
+  }
+
+  const regex = /(\b[a-z]+\b\s){11,23}\b[a-z]+\b/g
+  const matches = dataString.match(regex)
+  const found = matches != null
+  if (found) {
+    for (const match of matches) {
+      const words = match.split(' ')
+      let allValid = true
+      for (const word of words) {
+        if (!wordlists.english.includes(word)) {
+          allValid = false
+          break
+        }
+      }
+      if (allValid) {
+        slackPoster(
+          `Log attempt rejected due to mnemonic seed detected ${words
+            .slice(0, 3)
+            .join('-')}`
+        ).catch(e => console.log(e.message))
+        throw new Error('Log includes sensitive mnemonic data')
+      }
+    }
   }
 }
 async function main(): Promise<void> {
