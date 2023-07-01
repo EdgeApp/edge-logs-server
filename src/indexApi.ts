@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import { wordlists } from 'bip39'
 import {
   asArray,
   asBoolean,
@@ -20,55 +19,8 @@ import { logger } from './client/util'
 import { config } from './config'
 import { setupInfos } from './couchSchema'
 import { slackPoster } from './postToSlack'
+import { checkForKeys } from './util'
 
-const KEY_WORDS = [
-  'avalancheKey',
-  'avalancheMnemonic',
-  'binanceMnemonic',
-  'binanceKey',
-  'binancesmartchainMnemonic',
-  'binancesmartchainKey',
-  'bitcoinKey',
-  'bitcoincashKey',
-  'celoMnemonic',
-  'celoKey',
-  'dashKey',
-  'eosOwnerKey',
-  'eosKey',
-  'ethDevKey',
-  'ethDevMnemonic',
-  'ethereumclassicKey',
-  'ethereumclassicMnemonic',
-  'ethereumKey',
-  'ethereumMnemonic',
-  'ethereumpowKey',
-  'ethereumpowMnemonic',
-  'fantomKey',
-  'fantomMnemonic',
-  'hederaMnemonic',
-  'hederaKey',
-  'litecoinKey',
-  'moneroMnemonic',
-  'mnemonic',
-  'optimismKey',
-  'optimismMnemonic',
-  'polkadotKey',
-  'polkadotMnemonic',
-  'rskKey',
-  'rskMnemonic',
-  'solanaKey',
-  'solanaMnemonic',
-  'stellarKey',
-
-  // Internal Edge Key Names
-  'allKeys',
-  'displayPrivateSeed',
-  'displayPublicSeed',
-  'publicWalletInfo',
-  'otpKey',
-  'loginKey',
-  'recoveryKey'
-]
 const FIVE_MINUTES = 1000 * 60 * 5
 
 const asLog = asObject({
@@ -204,11 +156,16 @@ function api(): void {
     let log: ReturnType<typeof asLog>
     try {
       log = asLog(req.body)
-      checkForKeys(req.body)
     } catch (e: any) {
       const message: string = e.message
       return res.status(400).send(message)
     }
+    const result = checkForKeys(log)
+    if (result != null) {
+      await slackPoster(result)
+      return res.status(400).send(result)
+    }
+
     let isoDate = new Date().toISOString()
     if (log.isoDate != null) {
       const date = new Date(log.isoDate)
@@ -358,47 +315,6 @@ function api(): void {
   })
 }
 
-function checkForKeys(data: any): void {
-  const dataString = JSON.stringify(data)
-  let badWords = ''
-  KEY_WORDS.forEach(word => {
-    const regexString = `"${word}\\\\*"`
-    const regex = new RegExp(regexString)
-    if (regex.test(dataString)) {
-      badWords += word + ' '
-    }
-  })
-  if (badWords !== '') {
-    slackPoster(`Log attempt rejected due to sensitive data ${badWords}`).catch(
-      e => console.log(e.message)
-    )
-    throw new Error('Log includes sensitive data')
-  }
-
-  const regex = /(\b[a-z]+\b\s){11,23}\b[a-z]+\b/g
-  const matches = dataString.match(regex)
-  const found = matches != null
-  if (found) {
-    for (const match of matches) {
-      const words = match.split(' ')
-      let allValid = true
-      for (const word of words) {
-        if (!wordlists.english.includes(word)) {
-          allValid = false
-          break
-        }
-      }
-      if (allValid) {
-        slackPoster(
-          `Log attempt rejected due to mnemonic seed detected ${words
-            .slice(0, 3)
-            .join('-')}`
-        ).catch(e => console.log(e.message))
-        throw new Error('Log includes sensitive mnemonic data')
-      }
-    }
-  }
-}
 async function main(): Promise<void> {
   const { couchDbFullpath } = config
   if (cluster.isPrimary) {
