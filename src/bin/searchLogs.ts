@@ -1,14 +1,9 @@
 import nano from 'nano'
 
 import { config } from '../config'
+import { checkForKeys } from '../util'
+
 const nanoDb = nano(config.couchDbFullpath)
-
-const searchTerms = process.argv.slice(2)
-
-if (searchTerms[0] == null) {
-  console.log('Missing search term')
-  process.exit(1)
-}
 
 main().catch(e => {
   console.error(e.message)
@@ -38,17 +33,17 @@ async function main(): Promise<void> {
         start = doc._id
       }
       end = doc._id
-
-      const s = JSON.stringify(doc)
-      let found = true
-      for (const searchTerm of searchTerms) {
-        if (!s.includes(searchTerm ?? '')) {
-          found = false
-          break
+      const s = JSON.stringify(doc, null, 2)
+      const lines = s.split('\n')
+      let lnum = -1
+      for (const line of lines) {
+        lnum++
+        const result = checkForKeys(line)
+        if (result != null) {
+          console.log(`Search items found in ${doc._id} line:${lnum}`)
+          console.log(result)
+          console.log('*****')
         }
-      }
-      if (found) {
-        console.log(`Search items found in ${doc._id}`)
       }
     }
     console.log(`Searched ${start} ${end}`)
