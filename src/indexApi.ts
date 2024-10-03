@@ -2,6 +2,7 @@
 import {
   asArray,
   asBoolean,
+  asDate,
   asNumber,
   asObject,
   asOptional,
@@ -67,6 +68,7 @@ const asLog = asObject({
       userId: asString,
       wallets: asArray(
         asObject({
+          created: asOptional(asDate),
           currencyCode: asString,
           customTokens: asOptional(asObject(asEdgeToken)),
           imported: asOptional(asBoolean),
@@ -111,6 +113,7 @@ const retrievedLogObj = {
       userId: asString,
       wallets: asArray(
         asObject({
+          created: asOptional(asDate),
           currencyCode: asString,
           customTokens: asOptional(asObject(asEdgeToken)),
           imported: asOptional(asBoolean),
