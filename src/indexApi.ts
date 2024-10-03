@@ -6,7 +6,8 @@ import {
   asObject,
   asOptional,
   asString,
-  asUnknown
+  asUnknown,
+  Cleaner
 } from 'cleaners'
 import cluster from 'cluster'
 import cookieParser from 'cookie-parser'
@@ -22,6 +23,27 @@ import { slackPoster } from './postToSlack'
 import { checkForKeys } from './util'
 
 const FIVE_MINUTES = 1000 * 60 * 5
+
+/**
+ * Cleaners ported from edge-core-js
+ */
+const asJsonObject: Cleaner<object> = raw => {
+  if (raw == null || typeof raw !== 'object') {
+    throw new TypeError('Expected a JSON object')
+  }
+  return raw
+}
+const asEdgeDenomination = asObject({
+  multiplier: asString,
+  name: asString,
+  symbol: asOptional(asString)
+})
+const asEdgeToken = asObject({
+  currencyCode: asString,
+  denominations: asArray(asEdgeDenomination),
+  displayName: asString,
+  networkLocation: asOptional(asJsonObject)
+})
 
 const asLog = asObject({
   isoDate: asOptional(asString),
@@ -46,6 +68,7 @@ const asLog = asObject({
       wallets: asArray(
         asObject({
           currencyCode: asString,
+          customTokens: asOptional(asObject(asEdgeToken)),
           imported: asOptional(asBoolean),
           repoId: asOptional(asString),
           pluginDump: asOptional(asUnknown)
@@ -89,6 +112,7 @@ const retrievedLogObj = {
       wallets: asArray(
         asObject({
           currencyCode: asString,
+          customTokens: asOptional(asObject(asEdgeToken)),
           imported: asOptional(asBoolean),
           repoId: asOptional(asString),
           pluginDump: asOptional(asUnknown)
