@@ -13,13 +13,12 @@ import {
 import cluster from 'cluster'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import { forkChildren, setupDatabase } from 'edge-server-tools'
+import { forkChildren } from 'edge-server-tools'
 import express from 'express'
 import nano, { MangoSelector } from 'nano'
 
 import { logger } from './client/util'
 import { config } from './config'
-import { setupInfos } from './couchSchema'
 import { slackPoster } from './postToSlack'
 import { checkForKeys } from './util'
 
@@ -297,8 +296,8 @@ function api(): void {
     const startTimestamp = parseFloat(start)
     const endTimestamp = parseFloat(end)
     if (
-      typeof startTimestamp !== 'number' ||
-      typeof endTimestamp !== 'number' ||
+      isNaN(startTimestamp) ||
+      isNaN(endTimestamp) ||
       startTimestamp > endTimestamp
     ) {
       res.status(400).send(`Bad Timestamp Values.`)
@@ -318,7 +317,10 @@ function api(): void {
       selector.userMessage = { $regex: userMessage }
     }
     if (userName !== undefined) {
-      selector.userName = { $eq: userName }
+      selector.$or = [
+        { 'loggedInUser.userName': { $eq: userName } },
+        { accounts: { $elemMatch: { username: { $eq: userName } } } }
+      ]
     }
 
     const query = {
@@ -343,11 +345,7 @@ function api(): void {
 }
 
 async function main(): Promise<void> {
-  const { couchDbFullpath } = config
   if (cluster.isPrimary) {
-    for (const setupInfo of setupInfos) {
-      await setupDatabase(couchDbFullpath, setupInfo).catch(e => console.log(e))
-    }
     forkChildren()
   } else {
     api()
