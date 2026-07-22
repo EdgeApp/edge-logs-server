@@ -291,7 +291,10 @@ function api(): void {
       selector.userMessage = { $regex: userMessage }
     }
     if (userName !== undefined) {
-      selector.userName = { $eq: userName }
+      selector.$or = [
+        { 'loggedInUser.userName': { $eq: userName } },
+        { accounts: { $elemMatch: { username: { $eq: userName } } } }
+      ]
     }
 
     const query = {
