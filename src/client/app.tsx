@@ -118,11 +118,15 @@ class App extends Component<{}, AppState> {
 
   login = async (params: SearchParams): Promise<void> => {
     console.time('login')
-    const response = await this.getData(params)
+    // Verify credentials with an empty-window query so the UI unlocks
+    // without waiting for a full day of logs to download.
+    const response = await this.getData({ ...params, start: 0, end: 0 })
     if (response === 200) {
       this.setState({
         status: 200
       })
+      // Now load the requested window in the background.
+      this.getData(params).catch(() => {})
     } else {
       this.setState({ loginMessage: 'Bad Username/Password' })
     }
