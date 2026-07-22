@@ -270,8 +270,8 @@ function api(): void {
     const startTimestamp = parseFloat(start)
     const endTimestamp = parseFloat(end)
     if (
-      typeof startTimestamp !== 'number' ||
-      typeof endTimestamp !== 'number' ||
+      isNaN(startTimestamp) ||
+      isNaN(endTimestamp) ||
       startTimestamp > endTimestamp
     ) {
       res.status(400).send(`Bad Timestamp Values.`)
