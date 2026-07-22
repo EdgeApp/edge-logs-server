@@ -1,6 +1,6 @@
 /* eslint-disable no-var */
 
-import { DatabaseSetup } from 'edge-server-tools'
+import { DatabaseSetup, makeMangoIndex } from 'edge-server-tools'
 
 /**
  * Describes a single database that should exist.
@@ -29,7 +29,12 @@ export interface CouchDbInfo {
 
 export const setupInfos: DatabaseSetup[] = [
   {
-    name: 'logs_records'
+    name: 'logs_records',
+    documents: {
+      '_design/timestamp': makeMangoIndex('timestamp', ['timestamp'], {
+        partitioned: false
+      })
+    }
   },
   {
     name: 'logs_login'
