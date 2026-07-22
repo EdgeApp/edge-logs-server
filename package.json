@@ -16,6 +16,7 @@
     "fio:promo": "node -r sucrase/register src/bin/fioPromo/fioPromo.ts",
     "precommit": "lint-staged && npm run prepare",
     "prepare": "npm-run-all clean -p build.*",
+    "setup": "node -r sucrase/register src/bin/setupDatabases.ts",
     "start": "node -r sucrase/register src/indexApi.ts",
     "test": "mocha -r sucrase/register 'test/**/*.test.ts'",
     "demo": "parcel serve src/client/index.html",

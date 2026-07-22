@@ -11,13 +11,12 @@ import {
 import cluster from 'cluster'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import { forkChildren, setupDatabase } from 'edge-server-tools'
+import { forkChildren } from 'edge-server-tools'
 import express from 'express'
 import nano, { MangoSelector } from 'nano'
 
 import { logger } from './client/util'
 import { config } from './config'
-import { setupInfos } from './couchSchema'
 import { slackPoster } from './postToSlack'
 import { checkForKeys } from './util'
 
@@ -319,11 +318,7 @@ function api(): void {
 }
 
 async function main(): Promise<void> {
-  const { couchDbFullpath } = config
   if (cluster.isPrimary) {
-    for (const setupInfo of setupInfos) {
-      await setupDatabase(couchDbFullpath, setupInfo).catch(e => console.log(e))
-    }
     forkChildren()
   } else {
     api()
