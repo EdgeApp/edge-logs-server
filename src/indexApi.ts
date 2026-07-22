@@ -323,10 +323,16 @@ function api(): void {
       ]
     }
 
+    // The results list only renders scalar fields. The heavy fields
+    // (data, accounts, loggedInUser with its wallet pluginDumps) are
+    // omitted here and fetched per-log via getLog instead.
+    const omittedFields = ['data', 'accounts', 'loggedInUser']
     const query = {
       selector,
       limit: 1000000,
-      fields: Object.keys(retrievedLogObj).filter(field => field !== 'data')
+      fields: Object.keys(retrievedLogObj).filter(
+        field => !omittedFields.includes(field)
+      )
     }
 
     try {
